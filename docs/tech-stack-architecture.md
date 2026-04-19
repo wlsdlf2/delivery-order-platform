@@ -34,30 +34,6 @@
 
 ---
 
-## 레이어드 아키텍처 (Layered Architecture)
-
-```
-[Client 요청]
-      ↓
-[ Controller Layer ]   ← HTTP 요청/응답 처리, DTO 변환
-      ↓
-[  Service Layer   ]   ← 비즈니스 로직 처리
-      ↓
-[ Repository Layer ]   ← DB 접근 (JPA)
-      ↓
-[   Database (PostgreSQL)   ]
-```
-
-### 각 레이어 역할
-
-| 레이어 | 역할 |
-|--------|------|
-| **Controller** | 클라이언트의 HTTP 요청을 받아 Service를 호출하고, 결과를 Response로 반환 |
-| **Service** | 실제 비즈니스 로직을 담당. 여러 Repository를 조합해 처리 |
-| **Repository** | DB와 직접 통신. JPA 인터페이스를 통해 CRUD 수행 |
-
----
-
 ## 도메인 구조 규칙
 
 - 각 도메인별로 **Entity** 클래스를 독립적으로 작성
@@ -77,6 +53,162 @@
 | Address (배송지) | 사용자 배송지 관리 | 주소지 필수 |
 | AI Request Log (AI 요청 로그) | AI API 요청/응답 기록 | 질문+답변 모두 저장 |
 
+---
+
+## 레이어드 아키텍처 (Layered Architecture)
+
+```
+[Client 요청]
+      ↓
+[ Controller Layer ]   ← HTTP 요청/응답 처리, DTO 변환
+      ↓
+[  Service Layer   ]   ← 비즈니스 로직 처리
+      ↓
+[ Repository Layer ]   ← DB 접근 (JPA)
+      ↓
+[   Database (PostgreSQL)   ]
+```
+
+
+## 패키지 구조 (Package Structure)
+
+### 전체 구조
+>추후 변동 가능성⭕
+```
+src/main/java/com/sparta/deliveryorderplatform
+│
+├── global
+│   ├── config
+│   │   ├── SecurityConfig.java
+│   │   └── ScheduleConfig.java
+│   ├── exception
+│   │   ├── GlobalExceptionHandler.java
+│   │   └── CustomException.java
+│   └── common
+│       └── ApiResponse.java
+│
+├── user
+│   ├── controller
+│   │   └── UserController.java
+│   ├── service
+│   │   └── UserService.java
+│   ├── repository
+│   │   └── UserRepository.java
+│   ├── entity
+│   │   └── User.java
+│   └── dto
+│       ├── UserRequestDto.java
+│       └── UserResponseDto.java
+│
+├── store
+│   ├── controller
+│   │   └── StoreController.java
+│   ├── service
+│   │   └── StoreService.java
+│   ├── repository
+│   │   └── StoreRepository.java
+│   ├── entity
+│   │   └── Store.java
+│   └── dto
+│       ├── StoreRequestDto.java
+│       └── StoreResponseDto.java
+│
+├── menu
+│   ├── controller
+│   │   └── MenuController.java
+│   ├── service
+│   │   └── MenuService.java
+│   ├── repository
+│   │   └── MenuRepository.java
+│   ├── entity
+│   │   └── Menu.java
+│   └── dto
+│       ├── MenuRequestDto.java
+│       └── MenuResponseDto.java
+│
+├── order
+│   ├── controller
+│   │   └── OrderController.java
+│   ├── service
+│   │   └── OrderService.java
+│   ├── repository
+│   │   └── OrderRepository.java
+│   ├── entity
+│   │   ├── Order.java
+│   │   └── OrderItem.java
+│   └── dto
+│       ├── OrderRequestDto.java
+│       └── OrderResponseDto.java
+│
+├── payment
+│   ├── controller
+│   │   └── PaymentController.java
+│   ├── service
+│   │   └── PaymentService.java
+│   ├── repository
+│   │   └── PaymentRepository.java
+│   ├── entity
+│   │   └── Payment.java
+│   └── dto
+│       ├── PaymentRequestDto.java
+│       └── PaymentResponseDto.java
+│
+├── review
+│   ├── controller
+│   │   └── ReviewController.java
+│   ├── service
+│   │   └── ReviewService.java
+│   ├── repository
+│   │   └── ReviewRepository.java
+│   ├── entity
+│   │   └── Review.java
+│   └── dto
+│       ├── ReviewRequestDto.java
+│       └── ReviewResponseDto.java
+│
+└── DeliveryOrderPlatformApplication.java
+```
+
+---
+
+## 레이어별 역할
+
+| 폴더 | 역할 |
+|------|------|
+| `controller` | HTTP 요청/응답 처리, DTO 변환 |
+| `service` | 비즈니스 로직 처리 |
+| `repository` | DB 접근 (JPA) |
+| `entity` | DB 테이블과 매핑되는 클래스 |
+| `dto` | 요청/응답 데이터 전달 객체 |
+
+---
+
+## global 폴더 역할
+
+| 폴더 | 파일 | 역할 |
+|------|------|------|
+| `config` | `SecurityConfig.java` | Spring Security, JWT 필터 설정 |
+| `config` | `ScheduleConfig.java` | 스케줄러 설정 |
+| `exception` | `GlobalExceptionHandler.java` | 전역 예외 처리 (`@RestControllerAdvice`) |
+| `exception` | `CustomException.java` | 프로젝트 공통 커스텀 예외 클래스 |
+| `common` | `ApiResponse.java` | 공통 응답 형식 래퍼 클래스 |
+
+---
+
+## 네이밍 규칙
+
+| 항목 | 규칙 | 예시 |
+|------|------|------|
+| Entity 클래스 | `Entity` 접미사 생략 | `Store.java` (O), `StoreEntity.java` (X) |
+| Request DTO | `{도메인}RequestDto` | `StoreRequestDto.java` |
+| Response DTO | `{도메인}ResponseDto` | `StoreResponseDto.java` |
+| Controller | `{도메인}Controller` | `StoreController.java` |
+| Service | `{도메인}Service` | `StoreService.java` |
+| Repository | `{도메인}Repository` | `StoreRepository.java` |
+
+> **Entity 접미사를 생략하는 이유**
+> `@Entity` 어노테이션이 이미 해당 클래스가 JPA 엔티티임을 명시하고 있기 때문에
+> 클래스명에 `Entity`를 중복으로 붙이지 않는 것이 일반적인 관례입니다.
 
 ### DTO 분리 예시 (Order 도메인 기준)
 
