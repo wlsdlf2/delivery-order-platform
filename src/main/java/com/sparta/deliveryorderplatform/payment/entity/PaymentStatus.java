@@ -1,7 +1,7 @@
 package com.sparta.deliveryorderplatform.payment.entity;
 
 public enum PaymentStatus {
-    PENDING("결제 대기 중"), COMPLETED("결제 완료"), CANCELLED("결제 취소")
+    PENDING("결제 대기 중"), COMPLETED("결제 완료"), CANCELLED("결제 취소");
 
     private final String message;
 
