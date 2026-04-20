@@ -1,5 +1,6 @@
 package com.sparta.deliveryorderplatform.catrgory.entity;
 
+import com.sparta.deliveryorderplatform.catrgory.dto.CategoryRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -40,13 +41,13 @@ public class Category {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public static Category createCategory(String name, String username) {
-        if (name == null || name.isBlank()) {
+    public static Category createCategory(CategoryRequestDTO requestDTO, String username) {
+        if (requestDTO.getName() == null || requestDTO.getName().isBlank()) {
             throw new IllegalArgumentException("카테고리명 누락");
         }
 
         return Category.builder()
-            .name(name)
+            .name(requestDTO.getName())
             .createdBy(username)
             .build();
     }
