@@ -27,6 +27,7 @@ public class Payment {
     private PaymentMethod paymentMethod = PaymentMethod.CARD;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     private Integer amount;
