@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class CreatePaymentRequest {
 
     @NotNull
-    private PaymentMethod PaymentMethod;
+    private PaymentMethod paymentMethod;
 }
