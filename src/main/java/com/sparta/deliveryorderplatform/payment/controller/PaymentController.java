@@ -68,7 +68,7 @@ public class PaymentController {
      * @param paymentId
      * @return
      */
-    @PatchMapping("/payments/{paymentId}")
+    @DeleteMapping("/payments/{paymentId}")
     public ResponseEntity<?> deletePayment(@PathVariable UUID paymentId) {
 
         paymentService.deletePayment(paymentId);
