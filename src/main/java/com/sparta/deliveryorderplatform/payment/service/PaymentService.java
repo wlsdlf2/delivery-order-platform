@@ -55,4 +55,12 @@ public class PaymentService {
                 () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
         );
     }
+
+    @Transactional
+    public void deletePayment(UUID paymentId) {
+
+        Payment payment = this.findPaymentById(paymentId);
+
+        payment.softDelete("user");
+    }
 }

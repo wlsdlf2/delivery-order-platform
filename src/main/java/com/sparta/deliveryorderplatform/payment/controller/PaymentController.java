@@ -7,6 +7,7 @@ import com.sparta.deliveryorderplatform.payment.dto.response.PaymentResponse;
 import com.sparta.deliveryorderplatform.payment.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -59,5 +60,18 @@ public class PaymentController {
 
         PaymentResponse response = paymentService.updatePaymentStatus(paymentId, request);
         return ApiResponse.success(response);
+    }
+
+    /**
+     * 결제 삭제 api(soft delete)
+     * todo : 권한 처리
+     * @param paymentId
+     * @return
+     */
+    @PatchMapping("/payments/{paymentId}")
+    public ResponseEntity<?> deletePayment(@PathVariable UUID paymentId) {
+
+        paymentService.deletePayment(paymentId);
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }
