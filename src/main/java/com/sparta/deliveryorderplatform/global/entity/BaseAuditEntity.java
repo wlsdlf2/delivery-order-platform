@@ -16,26 +16,31 @@ import lombok.Getter;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class BaseAuditEntity {
+public abstract class BaseAuditEntity {
 
 	@CreatedDate
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
 	@CreatedBy
-	@Column(length = 100, updatable = false)
-	private String createdBy;
+	@Column(nullable = false, updatable = false)
+	private Long createdBy;
 
 	@LastModifiedDate
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
 
 	@LastModifiedBy
-	@Column(length = 100, nullable = false)
-	private String updatedBy;
+	@Column(nullable = false)
+	private Long updatedBy;
 
-	private LocalDateTime deltedAt;
+	private LocalDateTime deletedAt;
 
 	@Column(length = 100)
-	private String deletedBy;
+	private Long deletedBy;
+
+	public void softDelete(Long userId) {
+		this.deletedAt = LocalDateTime.now();
+		this.deletedBy = userId;
+	}
 }
