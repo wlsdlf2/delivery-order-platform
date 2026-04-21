@@ -1,6 +1,7 @@
 package com.sparta.deliveryorderplatform.payment.controller;
 
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
+import com.sparta.deliveryorderplatform.payment.dto.request.UpdatePaymentStatusRequest;
 import com.sparta.deliveryorderplatform.payment.dto.request.CreatePaymentRequest;
 import com.sparta.deliveryorderplatform.payment.dto.response.PaymentResponse;
 import com.sparta.deliveryorderplatform.payment.service.PaymentService;
@@ -21,6 +22,7 @@ public class PaymentController {
     /**
      * 결제 처리 api
      * todo : 권한 처리, 주문 정보 받아와서 금액 등 넣어야 함
+     * todo : 결제 상태에 관해 고민해봐야 할듯
      * @param orderId
      * @param request
      * @return
@@ -41,6 +43,21 @@ public class PaymentController {
     public ApiResponse<?> getPaymentById(@PathVariable UUID paymentId) {
 
         PaymentResponse response = paymentService.getPaymentById(paymentId);
+        return ApiResponse.success(response);
+    }
+
+    /**
+     * 결제 상태 수정 api
+     * todo : 권한 처리
+     * @param paymentId
+     * @param request
+     * @return
+     */
+    @PatchMapping("/payments/{paymentId}")
+    public ApiResponse<?> updatePaymentStatus(@PathVariable UUID paymentId,
+                                              @Valid @RequestBody UpdatePaymentStatusRequest request) {
+
+        PaymentResponse response = paymentService.updatePaymentStatus(paymentId, request);
         return ApiResponse.success(response);
     }
 }

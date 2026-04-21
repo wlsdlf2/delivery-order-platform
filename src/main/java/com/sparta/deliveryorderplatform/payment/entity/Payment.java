@@ -1,5 +1,8 @@
 package com.sparta.deliveryorderplatform.payment.entity;
 
+import com.sparta.deliveryorderplatform.global.exception.CustomException;
+import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.payment.dto.request.UpdatePaymentStatusRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,5 +42,17 @@ public class Payment {
                 .orderId(orderId)
                 .amount(amount)
                 .build();
+    }
+
+    public void updatePaymentStatus(UpdatePaymentStatusRequest request) {
+        if (this.paymentStatus == PaymentStatus.CANCELLED) {
+            throw new CustomException(ErrorCode.ALREADY_CANCELLED);
+        }
+        if (this.paymentStatus == PaymentStatus.COMPLETED
+                && request.getPaymentStatus() == PaymentStatus.PENDING) {
+            throw new CustomException(ErrorCode.INVALID_PAYMENT_STATUS);
+        }
+
+        this.paymentStatus = request.getPaymentStatus();
     }
 }
