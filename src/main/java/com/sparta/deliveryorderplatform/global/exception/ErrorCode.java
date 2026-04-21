@@ -8,7 +8,13 @@ import lombok.Getter;
 public enum ErrorCode {
 	// 에러별 enum값 추가하여 사용
 	// 400 BAD_REQUEST(예시)
-	INVALID_PASSWORD(400, "비밀번호가 올바르지 않습니다.");
+	INVALID_PASSWORD(400, "비밀번호가 올바르지 않습니다."),
+
+	UNAUTHORIZED_ACCESS(403, "접근 권한이 없습니다."),
+
+	CATEGORY_NOT_FOUND(404, "존재하지 않거나 삭제된 카테고리입니다."),
+	AREA_NOT_FOUND(404, "존재하지 않거나 삭제된 운영지역입니다."),
+	STORE_NOT_FOUND(404, "존재하지 않거나 삭제된 가게입니다.");
 
 	private final int status;
 	private final String message;
