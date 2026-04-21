@@ -12,8 +12,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class JpaAuditingConfig {
 
 	@Bean
-	public AuditorAware<Long> auditorProvider() {
+	public AuditorAware<String> auditorProvider() {
 		// 추후 JWT 구현 후 로그인 사용자ID가 들어가도록 수정할 예정
-		return () -> Optional.of(1L);
+		return () -> Optional.of("admin");
 	}
 }
