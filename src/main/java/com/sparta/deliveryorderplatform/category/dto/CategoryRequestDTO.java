@@ -1,4 +1,4 @@
-package com.sparta.deliveryorderplatform.catrgory.dto;
+package com.sparta.deliveryorderplatform.category.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

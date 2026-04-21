@@ -1,6 +1,6 @@
-package com.sparta.deliveryorderplatform.catrgory.dto;
+package com.sparta.deliveryorderplatform.category.dto;
 
-import com.sparta.deliveryorderplatform.catrgory.entity.Category;
+import com.sparta.deliveryorderplatform.category.entity.Category;
 import lombok.*;
 
 import java.time.LocalDateTime;

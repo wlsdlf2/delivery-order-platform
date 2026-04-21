@@ -1,9 +1,11 @@
-package com.sparta.deliveryorderplatform.catrgory.service;
+package com.sparta.deliveryorderplatform.category.service;
 
-import com.sparta.deliveryorderplatform.catrgory.dto.CategoryRequestDTO;
-import com.sparta.deliveryorderplatform.catrgory.dto.CategoryResponseDTO;
-import com.sparta.deliveryorderplatform.catrgory.entity.Category;
-import com.sparta.deliveryorderplatform.catrgory.repository.CategoryRepository;
+import com.sparta.deliveryorderplatform.category.dto.CategoryRequestDTO;
+import com.sparta.deliveryorderplatform.category.dto.CategoryResponseDTO;
+import com.sparta.deliveryorderplatform.category.entity.Category;
+import com.sparta.deliveryorderplatform.category.repository.CategoryRepository;
+import com.sparta.deliveryorderplatform.global.exception.CustomException;
+import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,11 +19,15 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     //create
     @Transactional
-    public CategoryResponseDTO createCategory(CategoryRequestDTO requestDTO, String username) {
+    public CategoryResponseDTO createCategory(CategoryRequestDTO requestDTO, String username, String role) {
+        // TODO: 회원 기능 담당자가 권한 체크 AOP 도입 시 아래 if문 삭제 예정
+        if (!"MASTER".equals(role)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
         Category category = Category.createCategory(requestDTO, username);
         Category savedCategory = categoryRepository.save(category);
         return CategoryResponseDTO.form(savedCategory);
@@ -31,7 +37,7 @@ public class CategoryService {
     //read
     @Transactional(readOnly = true)
     public Page<CategoryResponseDTO> getCategories(String keyword, String role, Pageable pageable) {
-        // 회원 권한 체크
+        // todo 회원 권한 체크 -> 추후 수정 예정
         boolean isAdmin = "MASTER".equals(role);
         boolean hasKeyword = keyword != null && !keyword.isBlank();
 
@@ -43,6 +49,11 @@ public class CategoryService {
     }
 
     // todo categoryId 1건 상세조회
+    @Transactional(readOnly = true)
+    public CategoryResponseDTO getCategoryById(UUID categoryId) {
+        Category category = findActiveCategory(categoryId);
+        return CategoryResponseDTO.form(category);
+    }
 
     //update
     @Transactional
@@ -64,7 +75,7 @@ public class CategoryService {
     private Category findActiveCategory(UUID categoryId) {
         return categoryRepository.findById(categoryId)
             .filter(c -> c.getDeletedAt() == null)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않거나 삭제된 카테고리."));
+            .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
     }
 
     // 데이터 조회
@@ -80,6 +91,5 @@ public class CategoryService {
 
         }
     }
-
 
 }

@@ -1,6 +1,6 @@
 package com.sparta.deliveryorderplatform.store.entity;
 
-import com.sparta.deliveryorderplatform.catrgory.entity.Category;
+import com.sparta.deliveryorderplatform.category.entity.Category;
 import jakarta.persistence.*;
 import lombok.*;
 

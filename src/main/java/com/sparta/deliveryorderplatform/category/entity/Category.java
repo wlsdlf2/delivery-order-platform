@@ -1,6 +1,6 @@
-package com.sparta.deliveryorderplatform.catrgory.entity;
+package com.sparta.deliveryorderplatform.category.entity;
 
-import com.sparta.deliveryorderplatform.catrgory.dto.CategoryRequestDTO;
+import com.sparta.deliveryorderplatform.category.dto.CategoryRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
