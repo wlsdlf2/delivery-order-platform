@@ -50,17 +50,17 @@ public class PaymentService {
         return PaymentResponse.from(payment);
     }
 
-    private Payment findPaymentById(UUID paymentId) {
-        return paymentRepository.findById(paymentId).orElseThrow(
-                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
-        );
-    }
-
     @Transactional
     public void deletePayment(UUID paymentId) {
 
         Payment payment = this.findPaymentById(paymentId);
 
         payment.softDelete("user");
+    }
+
+    private Payment findPaymentById(UUID paymentId) {
+        return paymentRepository.findByIdAndDeletedAtIsNull(paymentId).orElseThrow(
+                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
+        );
     }
 }
