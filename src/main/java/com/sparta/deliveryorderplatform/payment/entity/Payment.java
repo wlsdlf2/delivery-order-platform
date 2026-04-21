@@ -1,5 +1,6 @@
 package com.sparta.deliveryorderplatform.payment.entity;
 
+import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import com.sparta.deliveryorderplatform.payment.dto.request.UpdatePaymentStatusRequest;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Payment {
+public class Payment extends BaseAuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
