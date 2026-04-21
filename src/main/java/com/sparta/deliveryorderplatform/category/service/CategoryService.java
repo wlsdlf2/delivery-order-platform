@@ -51,18 +51,18 @@ public class CategoryService {
 
     //update
     @Transactional
-    public CategoryResponseDTO updateCategory(UUID categoryId, CategoryRequestDTO requestDTO, String updatedBy) {
+    public CategoryResponseDTO updateCategory(UUID categoryId, CategoryRequestDTO requestDTO, String username) {
         Category category = findActiveCategory(categoryId);
-        category.updateCategory(requestDTO.getName(), updatedBy);
+        category.updateCategory(requestDTO.getName(), username);
 
         return CategoryResponseDTO.form(category);
     }
 
     //delete
     @Transactional
-    public CategoryResponseDTO deleteCategory(UUID categoryId, String deletedBy) {
+    public CategoryResponseDTO deleteCategory(UUID categoryId, String username) {
         Category category = findActiveCategory(categoryId);
-        category.deleteCategory(deletedBy);
+        category.deleteCategory(username);
 
         return CategoryResponseDTO.form(category);
     }

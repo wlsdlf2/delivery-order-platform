@@ -1,6 +1,7 @@
 package com.sparta.deliveryorderplatform.category.entity;
 
 import com.sparta.deliveryorderplatform.category.dto.CategoryRequestDTO;
+import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Builder(access = AccessLevel.PRIVATE)
 @Table(name = "p_category")
 @Entity
-public class Category {
+public class Category extends BaseAuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,24 +24,6 @@ public class Category {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
-    // Audit Fields
-    private LocalDateTime createdAt;
-    private String createdBy;
-    private LocalDateTime updatedAt;
-    private String updatedBy;
-    private LocalDateTime deletedAt;
-    private String deletedBy;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
     public static Category createCategory(CategoryRequestDTO requestDTO, String username) {
         if (requestDTO.getName() == null || requestDTO.getName().isBlank()) {
             throw new IllegalArgumentException("카테고리명 누락");
@@ -48,22 +31,18 @@ public class Category {
 
         return Category.builder()
             .name(requestDTO.getName())
-            .createdBy(username)
             .build();
     }
 
-    public void updateCategory(String name, String updatedBy) {
+    public void updateCategory(String name, String username) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("카테고리명 누락");
         }
 
         this.name = name;
-        this.updatedBy = updatedBy;
     }
 
-
-    public void deleteCategory(String deletedBy) {
-        this.deletedBy = deletedBy;
-        this.deletedAt = LocalDateTime.now();
+    public void deleteCategory(String username) {
+        super.softDelete(username);
     }
 }

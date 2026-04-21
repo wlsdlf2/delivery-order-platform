@@ -22,7 +22,7 @@ public class CategoryController {
     @PostMapping
     public ApiResponse<CategoryResponseDTO> createCategory(
         @RequestBody CategoryRequestDTO categoryRequestDTO,
-        @RequestHeader("X-Username") String username,       // 임시
+        @RequestHeader("X-Username") String username,          // 임시
         @RequestHeader("X-Role")  String role               // 임시
     ) {
         return ApiResponse.success(categoryService.createCategory(categoryRequestDTO, username, role));

@@ -35,24 +35,6 @@ public class Area {
     @Builder.Default
     private Boolean isActive = true;
 
-    // Audit Fields
-    private LocalDateTime createdAt;
-    private String createdBy;
-    private LocalDateTime updatedAt;
-    private String updatedBy;
-    private LocalDateTime deletedAt;
-    private String deletedBy;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
     public static Area createArea(String name, String city, String district, String username) {
         if (name == null || city == null || district == null) {
             throw new IllegalArgumentException("운영지역 정보(명칭, 시/도, 구/군) 누락");
@@ -62,12 +44,12 @@ public class Area {
             .name(name)
             .city(city)
             .district(district)
-            .createdBy(username)
+//            .createdBy(username)
             .build();
     }
 
     // 지역 기본 정보 수정
-    public void updateArea(String name, String city, String district, String updatedBy) {
+    public void updateArea(String name, String city, String district, String username) {
         if (name == null || city == null || district == null) {
             throw new IllegalArgumentException("운영지역 정보(명칭, 시/도, 구/군) 누락");
         }
@@ -75,19 +57,19 @@ public class Area {
         this.name = name;
         this.city = city;
         this.district = district;
-        this.updatedBy = updatedBy;
+//        this.updatedBy = updatedBy;
     }
 
     // 운영 지역 활성화/비활성화 스위칭
-    public void updateActiveStatus(boolean isActive, String updatedBy) {
+    public void updateActiveStatus(boolean isActive, String username) {
         this.isActive = isActive;
-        this.updatedBy = updatedBy;
+//        this.updatedBy = updatedBy;
     }
 
-    public void deleteArea(String deletedBy) {
+    public void deleteArea(String username) {
         this.isActive = false;
-        this.deletedAt = LocalDateTime.now();
-        this.deletedBy = deletedBy;
+//        this.deletedAt = LocalDateTime.now();
+//        this.deletedBy = deletedBy;
     }
 
 }
