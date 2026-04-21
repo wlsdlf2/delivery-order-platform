@@ -32,4 +32,12 @@ public class PaymentService {
 
         return PaymentResponse.from(payment);
     }
+
+    @Transactional(readOnly = true)
+    public PaymentResponse getPaymentById(UUID paymentId) {
+
+        return PaymentResponse.from(paymentRepository.findById(paymentId).orElseThrow(
+                () -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND)
+        ));
+    }
 }
