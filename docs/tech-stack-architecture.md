@@ -84,6 +84,8 @@ src/main/java/com/sparta/deliveryorderplatform
 │   ├── exception
 │   │   ├── GlobalExceptionHandler.java
 │   │   └── CustomException.java
+│   ├── entity
+│   │   └── BaseTimeEntity.java
 │   └── common
 │       └── ApiResponse.java
 │
