@@ -8,14 +8,10 @@ import lombok.Getter;
 public enum ErrorCode {
 	// 에러별 enum값 추가하여 사용
 	// 400 BAD_REQUEST(예시)
-	INVALID_PASSWORD(400, "비밀번호가 올바르지 않습니다."),
-	INVALID_PAYMENT_METHOD(400, "올바른 결제 수단을 선택해 주세요"),
-	PAYMENT_NOT_FOUND(404, "결제 정보를 찾을 수 없습니다."),
-	ALREADY_CANCELLED(400, "이미 취소된 결제입니다."),
-	INVALID_PAYMENT_STATUS(400, "유효하지 않은 결제 상태 변경입니다.")
-	;
-
+	VALIDATION_ERROR(400, "VALIDATION_ERROR", "요청 값이 올바르지 않습니다."),
+	INVALID_PASSWORD(400, "INVALID_PASSWORD", "비밀번호가 올바르지 않습니다.");
 
 	private final int status;
+	private final String code;
 	private final String message;
 }
