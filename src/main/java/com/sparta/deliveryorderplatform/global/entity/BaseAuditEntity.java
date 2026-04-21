@@ -24,7 +24,7 @@ public abstract class BaseAuditEntity {
 
 	@CreatedBy
 	@Column(nullable = false, updatable = false)
-	private Long createdBy;
+	private String createdBy;
 
 	@LastModifiedDate
 	@Column(nullable = false)
@@ -32,15 +32,15 @@ public abstract class BaseAuditEntity {
 
 	@LastModifiedBy
 	@Column(nullable = false)
-	private Long updatedBy;
+	private String updatedBy;
 
 	private LocalDateTime deletedAt;
 
 	@Column(length = 100)
-	private Long deletedBy;
+	private String deletedBy;
 
-	public void softDelete(Long userId) {
+	public void softDelete(String user) {
 		this.deletedAt = LocalDateTime.now();
-		this.deletedBy = userId;
+		this.deletedBy = user;
 	}
 }
