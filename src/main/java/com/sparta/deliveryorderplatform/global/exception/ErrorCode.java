@@ -9,7 +9,10 @@ public enum ErrorCode {
 	// 에러별 enum값 추가하여 사용
 	// 400 BAD_REQUEST(예시)
 	VALIDATION_ERROR(400, "VALIDATION_ERROR", "요청 값이 올바르지 않습니다."),
-	INVALID_PASSWORD(400, "INVALID_PASSWORD", "비밀번호가 올바르지 않습니다.");
+	INVALID_PASSWORD(400, "INVALID_PASSWORD", "비밀번호가 올바르지 않습니다."),
+
+	// review
+	REVIEW_NOT_FOUND(404, "REVIEW_NOT_FOUND", "리뷰를 찾을 수 없습니다.");
 
 	private final int status;
 	private final String code;

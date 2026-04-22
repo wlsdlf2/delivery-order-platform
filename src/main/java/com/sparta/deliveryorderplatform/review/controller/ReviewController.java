@@ -19,6 +19,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     /**
+     * 리뷰 등록 api
      * todo : 권한 처리
      * @param orderId
      * @param request
@@ -29,6 +30,19 @@ public class ReviewController {
                                           @Valid @RequestBody CreateReviewRequest request) {
 
         ReviewResponse response = reviewService.createReview(orderId, "tmp", request);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    /**
+     * 리뷰 상세 조회 api
+     * @param reviewId
+     * @return
+     */
+    @GetMapping("/reviews/{reviewId}")
+    public ResponseEntity<?> getReviewById(@PathVariable UUID reviewId) {
+
+        ReviewResponse response = reviewService.getReviewById(reviewId);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

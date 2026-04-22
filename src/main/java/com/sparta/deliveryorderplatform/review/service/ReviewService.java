@@ -1,11 +1,14 @@
 package com.sparta.deliveryorderplatform.review.service;
 
+import com.sparta.deliveryorderplatform.global.exception.CustomException;
+import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import com.sparta.deliveryorderplatform.review.dto.request.CreateReviewRequest;
 import com.sparta.deliveryorderplatform.review.dto.response.ReviewResponse;
 import com.sparta.deliveryorderplatform.review.entity.Review;
 import com.sparta.deliveryorderplatform.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -15,6 +18,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
 
+    @Transactional
     public ReviewResponse createReview(UUID orderId, String username, CreateReviewRequest request) {
 
         // Order 찾는 로직
@@ -29,5 +33,15 @@ public class ReviewService {
         return ReviewResponse.from(reviewRepository.save(review));
     }
 
+    @Transactional(readOnly = true)
+    public ReviewResponse getReviewById(UUID reviewId) {
 
+        return ReviewResponse.from(this.findReviewById(reviewId));
+    }
+
+    private Review findReviewById(UUID id) {
+        return reviewRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
+                () -> new CustomException(ErrorCode.REVIEW_NOT_FOUND)
+        );
+    }
 }
