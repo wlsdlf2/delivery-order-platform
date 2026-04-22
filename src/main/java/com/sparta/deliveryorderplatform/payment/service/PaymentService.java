@@ -38,6 +38,14 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
+    public Page<PaymentResponse> getPaymentList(int page, int size) {
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        return paymentRepository.findAllByDeletedAtIsNull(pageRequest).map(PaymentResponse::from);
+    }
+
+    @Transactional(readOnly = true)
     public PaymentResponse getPaymentById(UUID paymentId) {
 
         return PaymentResponse.from(this.findPaymentById(paymentId));
@@ -59,14 +67,6 @@ public class PaymentService {
         Payment payment = this.findPaymentById(paymentId);
 
         payment.softDelete("user");
-    }
-
-    @Transactional(readOnly = true)
-    public Page<PaymentResponse> getPaymentList(int page, int size) {
-
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        return paymentRepository.findAll(pageRequest).map(PaymentResponse::from);
     }
 
     private Payment findPaymentById(UUID paymentId) {
