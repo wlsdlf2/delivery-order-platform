@@ -2,10 +2,13 @@ package com.sparta.deliveryorderplatform.area.controller;
 
 import com.sparta.deliveryorderplatform.area.dto.AreaRequestDTO;
 import com.sparta.deliveryorderplatform.area.dto.AreaResponseDTO;
+import com.sparta.deliveryorderplatform.area.dto.AreaSearchDTO;
 import com.sparta.deliveryorderplatform.area.service.AreaService;
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
+import com.sparta.deliveryorderplatform.global.common.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -27,16 +30,20 @@ public class AreaController {
     }
 
     // get 목록 조회
-//    @GetMappingping
-//    public ApiResponse getAreas() {
-//
-//    }
-//
-//    // get 상세 조회
-//    @GetMapping("/{areaId}")
-//    public ApiResponse getAreaById(@PathVariable UUID areaid) {
-//
-//    }
+    @GetMapping
+    public ApiResponse<PageResponse<AreaResponseDTO>> getAreas(
+        AreaSearchDTO searchDTO,
+        @RequestHeader("X-Role") String role,
+        Pageable pageable
+    ) {
+        return ApiResponse.success(PageResponse.of(areaService.getAreas(searchDTO, role, pageable)));
+    }
+
+    // get 상세 조회
+    @GetMapping("/{areaId}")
+    public ApiResponse<AreaResponseDTO> getAreaById(@PathVariable UUID areaId) {
+        return ApiResponse.success(areaService.getAreaById(areaId));
+    }
 
     // update
     @PutMapping("/{areaId}")
