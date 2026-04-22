@@ -35,6 +35,10 @@ public class Order extends BaseAuditEntity {
     private User user;                              // order를 한 user 식별자
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "sotre_id",nullable = false)
+    private Store store;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="address_id" , nullable = false) // 주소 외래키
     private Address address;                        // order 주소 식별자
 
