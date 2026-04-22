@@ -29,6 +29,7 @@ public class ReviewResponse {
                 .reviewId(review.getId())
                 .orderId(review.getOrderId())
                 .storeId(review.getStoreId())
+                .username(review.getUsername())
                 .rating(review.getRating())
                 .content(review.getContent())
                 .build();
