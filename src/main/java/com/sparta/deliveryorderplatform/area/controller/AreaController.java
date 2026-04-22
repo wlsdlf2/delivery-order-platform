@@ -23,7 +23,7 @@ public class AreaController {
         @RequestHeader("X-Username") String username,
         @RequestHeader("X-Role") String role
     ) {
-        return ApiResponse.success(areaService.createArea(requestDTO, username, role));
+        return ApiResponse.success(areaService.createArea(requestDTO));
     }
 
     // get 목록 조회

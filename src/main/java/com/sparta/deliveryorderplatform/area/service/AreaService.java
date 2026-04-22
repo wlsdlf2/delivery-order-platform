@@ -20,11 +20,9 @@ public class AreaService {
 
     // create
     @Transactional
-    public AreaResponseDTO createArea(AreaRequestDTO requestDTO, String username, String role) {
+    public AreaResponseDTO createArea(AreaRequestDTO requestDTO) {
         // 운영지역명 중복 체크
-        if (areaRepository.existsByName(requestDTO.getName())) {
-            throw new CustomException(ErrorCode.DUPLICATE_AREA_NAME);
-        }
+        validateDuplicateName(requestDTO.getName());
 
         Area area = Area.create(requestDTO.getName(), requestDTO.getCity(), requestDTO.getDistrict());
         Area savedArea = areaRepository.save(area);
@@ -38,25 +36,24 @@ public class AreaService {
     // get 상세 조회
 
     // update
-    // todo? @PreAuthorize("hasRole('MASTER')")
     @Transactional
     public AreaResponseDTO updateArea(UUID areaId, AreaRequestDTO requestDTO) {
+        // 삭제되지 않은 데이터 조회
         Area area = findActiveArea(areaId);
 
-        // 지역명이 변경될 때만 중복 체크
-        if (!area.getName().equals(requestDTO.getName()) &&
-            areaRepository.existsByName(requestDTO.getName())) {
-            throw new CustomException(ErrorCode.DUPLICATE_AREA_NAME);
+        // 지역명이 변경될 때만 운영지역명 중복 체크
+        if (!area.getName().equals(requestDTO.getName())) {
+            validateDuplicateName(requestDTO.getName());
         }
 
         area.update(requestDTO.getName(), requestDTO.getCity(), requestDTO.getDistrict(), requestDTO.getIsActive());
-
         return AreaResponseDTO.from(area);
     }
 
     // delete
     @Transactional
     public AreaResponseDTO deleteArea(UUID areaId, String username) {
+        // 삭제되지 않은 데이터 조회
         Area area = findActiveArea(areaId);
         area.delete(username);
         return AreaResponseDTO.from(area);
@@ -65,5 +62,11 @@ public class AreaService {
     private Area findActiveArea(UUID areaId) {
         return areaRepository.findByIdAndDeletedAtIsNull(areaId)
             .orElseThrow(() -> new CustomException(ErrorCode.AREA_NOT_FOUND));
+    }
+
+    private void validateDuplicateName(String name) {
+        if (areaRepository.existsByNameAndDeletedAtIsNull(name)) {
+            throw new CustomException(ErrorCode.DUPLICATE_AREA_NAME);
+        }
     }
 }
