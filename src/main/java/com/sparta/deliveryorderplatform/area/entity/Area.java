@@ -1,5 +1,8 @@
 package com.sparta.deliveryorderplatform.area.entity;
 
+import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
+import com.sparta.deliveryorderplatform.global.exception.CustomException;
+import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +15,7 @@ import java.util.UUID;
 @Builder(access = AccessLevel.PRIVATE)
 @Table(name = "p_area")
 @Entity
-public class Area {
+public class Area extends BaseAuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -35,41 +38,38 @@ public class Area {
     @Builder.Default
     private Boolean isActive = true;
 
-    public static Area createArea(String name, String city, String district, String username) {
+    public static Area create(String name, String city, String district) {
         if (name == null || city == null || district == null) {
-            throw new IllegalArgumentException("운영지역 정보(명칭, 시/도, 구/군) 누락");
+            throw new CustomException(ErrorCode.VALIDATION_ERROR);
         }
 
         return Area.builder()
             .name(name)
             .city(city)
             .district(district)
-//            .createdBy(username)
             .build();
     }
 
     // 지역 기본 정보 수정
-    public void updateArea(String name, String city, String district, String username) {
+    public void updateArea(String name, String city, String district) {
         if (name == null || city == null || district == null) {
-            throw new IllegalArgumentException("운영지역 정보(명칭, 시/도, 구/군) 누락");
+            throw new CustomException(ErrorCode.VALIDATION_ERROR);
         }
 
         this.name = name;
         this.city = city;
         this.district = district;
-//        this.updatedBy = updatedBy;
     }
 
     // 운영 지역 활성화/비활성화 스위칭
-    public void updateActiveStatus(boolean isActive, String username) {
+    public void updateActiveStatus(boolean isActive) {
         this.isActive = isActive;
-//        this.updatedBy = updatedBy;
     }
 
+    // 운영 지역 삭제
     public void deleteArea(String username) {
+        super.softDelete(username);
         this.isActive = false;
-//        this.deletedAt = LocalDateTime.now();
-//        this.deletedBy = deletedBy;
     }
 
 }
