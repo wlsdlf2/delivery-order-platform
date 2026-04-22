@@ -22,6 +22,7 @@ public class ReviewController {
     /**
      * 리뷰 등록 api
      * todo : 권한 처리
+     * todo : user, store, order 찾는 로직 추가
      * @param orderId
      * @param request
      * @return
