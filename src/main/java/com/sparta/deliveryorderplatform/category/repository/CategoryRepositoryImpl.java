@@ -1,7 +1,6 @@
 package com.sparta.deliveryorderplatform.category.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.deliveryorderplatform.category.dto.CategorySearchDTO;
 import com.sparta.deliveryorderplatform.category.entity.Category;
@@ -20,25 +19,18 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom {
     QCategory qCategory = QCategory.category;
 
     @Override
-    public Page<Category> searchCategories(CategorySearchDTO searchDTO, Pageable pageable) {
-        // 데이터 조회 기본쿼리 생성
-        JPAQuery<Category> query = queryFactory
+    public Page<Category> searchCategoriesForAdmin(CategorySearchDTO searchDTO, Pageable pageable) {
+        List<Category> list = queryFactory
             .selectFrom(qCategory)
             .where(
                 containsKeyword(searchDTO.getKeyword()),
                 isAccessible(searchDTO.getIsAdmin())
             )
-            .orderBy(qCategory.createdAt.desc());
+            .orderBy(qCategory.createdAt.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
 
-        // 페이징처리 여부
-        if (pageable.isPaged()) {
-            query.offset(pageable.getOffset())
-                .limit(pageable.getPageSize());
-        }
-
-        List<Category> list = query.fetch();
-
-        // 카운트 -> 페이징
         Long total = queryFactory
             .select(qCategory.count())
             .from(qCategory)
@@ -47,8 +39,20 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom {
                 isAccessible(searchDTO.getIsAdmin())
             )
             .fetchOne();
-        
-        return new PageImpl<>(list, pageable, total);
+
+        return new PageImpl<>(list, pageable, total != null ? total : 0L);
+    }
+
+    @Override
+    public List<Category> searchCategoriesForUser(CategorySearchDTO searchDTO) {
+        return queryFactory
+            .selectFrom(qCategory)
+            .where(
+                containsKeyword(searchDTO.getKeyword()),
+                isAccessible(searchDTO.getIsAdmin())
+            )
+            .orderBy(qCategory.createdAt.desc())
+            .fetch();
     }
 
     private BooleanExpression containsKeyword(String keyword) {

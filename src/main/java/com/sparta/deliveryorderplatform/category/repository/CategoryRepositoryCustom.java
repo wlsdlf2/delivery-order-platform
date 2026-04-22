@@ -5,6 +5,9 @@ import com.sparta.deliveryorderplatform.category.entity.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface CategoryRepositoryCustom {
-    Page<Category> searchCategories(CategorySearchDTO searchDTO, Pageable pageable);
+    Page<Category> searchCategoriesForAdmin(CategorySearchDTO searchDTO, Pageable pageable);
+    List<Category> searchCategoriesForUser(CategorySearchDTO searchDTO);
 }

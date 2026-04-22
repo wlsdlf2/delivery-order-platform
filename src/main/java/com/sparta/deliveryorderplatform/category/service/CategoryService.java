@@ -9,10 +9,12 @@ import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -37,25 +39,34 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public Page<CategoryResponseDTO> getCategories(CategorySearchDTO searchDTO, String role, Pageable pageable) {
         // 권한에 따라 검색 조건 결정 : 삭제된 데이터 조회 여부
-        searchDTO.setIsAdmin("MASTER".equals(role));
+        boolean isAdmin = "MASTER".equals(role);
+        searchDTO.setIsAdmin(isAdmin);
 
-        // 데이터 가져오기(QueryDSL 메서드 호출)
-        Page<Category> categoryPage = categoryRepository.searchCategories(searchDTO, pageable);
-
-        // entity -> dto(리턴)
-        return categoryPage.map(category -> CategoryResponseDTO.from(category));
+        if (isAdmin) {
+            // 관리자 -> 페이징 처리
+            return categoryRepository.searchCategoriesForAdmin(searchDTO, pageable)
+                    .map(CategoryResponseDTO::from);
+        } else {
+            // 일반 사용자 -> 전체 목록
+            List<Category> categories = categoryRepository.searchCategoriesForUser(searchDTO);
+            return new PageImpl<>(
+                categories.stream().map(CategoryResponseDTO::from).toList(),
+                Pageable.unpaged(),
+                categories.size()
+            );
+        }
     }
 
     @Transactional(readOnly = true)
     public CategoryResponseDTO getCategoryById(UUID categoryId) {
-        Category category = findActiveCategory(categoryId);
+        Category category = findCategoryById(categoryId);
         return CategoryResponseDTO.from(category);
     }
 
     //update
     @Transactional
     public CategoryResponseDTO updateCategory(UUID categoryId, CategoryRequestDTO requestDTO) {
-        Category category = findActiveCategory(categoryId);
+        Category category = findCategoryById(categoryId);
 
         // 이름이 변경될 때만 중복 체크
         if (!category.getName().equals(requestDTO.getName())) {
@@ -72,14 +83,14 @@ public class CategoryService {
     //delete
     @Transactional
     public CategoryResponseDTO deleteCategory(UUID categoryId, String username) {
-        Category category = findActiveCategory(categoryId);
+        Category category = findCategoryById(categoryId);
         category.delete(username);
 
         return CategoryResponseDTO.from(category);
     }
 
-    // 공통 유효성 검증 및 조회
-    private Category findActiveCategory(UUID categoryId) {
+    // 헬퍼 메서드: 삭제되지 않은 데이터 조회
+    private Category findCategoryById(UUID categoryId) {
         return categoryRepository.findByIdAndDeletedAtIsNull(categoryId)
             .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
     }

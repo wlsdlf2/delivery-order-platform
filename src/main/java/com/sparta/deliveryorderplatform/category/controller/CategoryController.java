@@ -5,9 +5,9 @@ import com.sparta.deliveryorderplatform.category.dto.CategoryResponseDTO;
 import com.sparta.deliveryorderplatform.category.dto.CategorySearchDTO;
 import com.sparta.deliveryorderplatform.category.service.CategoryService;
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
+import com.sparta.deliveryorderplatform.global.common.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,12 +31,12 @@ public class CategoryController {
 
     // get 목록조회
     @GetMapping
-    public ApiResponse<Page<CategoryResponseDTO>> getCategories(
+    public ApiResponse<PageResponse<CategoryResponseDTO>> getCategories(
         CategorySearchDTO searchDTO,
         @RequestHeader("X-Role") String role,
         Pageable pageable
     ) {
-        return ApiResponse.success(categoryService.getCategories(searchDTO, role, pageable));
+        return ApiResponse.success(PageResponse.of(categoryService.getCategories(searchDTO, role, pageable)));
     }
 
 
