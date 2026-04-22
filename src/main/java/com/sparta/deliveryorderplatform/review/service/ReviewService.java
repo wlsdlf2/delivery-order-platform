@@ -50,6 +50,14 @@ public class ReviewService {
         return ReviewResponse.from(review);
     }
 
+    @Transactional
+    public void deleteReview(UUID reviewId, String username) {
+
+        Review review = this.findReviewById(reviewId);
+
+        review.softDelete(username);
+    }
+
     private Review findReviewById(UUID id) {
         return reviewRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
                 () -> new CustomException(ErrorCode.REVIEW_NOT_FOUND)

@@ -63,4 +63,18 @@ public class ReviewController {
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    /**
+     * 리뷰 삭제 api
+     * todo : 사용자 권한 처리 추가
+     * @param reviewId
+     * @return
+     */
+    @DeleteMapping("/reviews/{reviewId}")
+    public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId) {
+
+        reviewService.deleteReview(reviewId, "tmp");
+
+        return ResponseEntity.ok(ApiResponse.success());
+    }
 }
