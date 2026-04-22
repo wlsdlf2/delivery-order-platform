@@ -2,6 +2,7 @@ package com.sparta.deliveryorderplatform.order.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,19 +10,25 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.awt.Menu;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@Getter
-@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter
 @Entity
 @Table(name = "p_order_item")
+@EntityListeners(AuditingEntityListener.class) //JPA가 자동으로 시간을 기록해주는 장치
 public class OrderItem  {
 
     @Id
@@ -49,8 +56,14 @@ public class OrderItem  {
 
     @CreatedBy
     @Column(name = "created_by", updatable = false, length = 100)
-    private String createdBy;                       // 생성자
+    private String createdBy;                       // 생성한 사람.
 
-
-
+    public static OrderItem createOrderItem(Order  order, Menu menu, Integer quantity, Integer unitPrice) {
+        return OrderItem.builder()
+            .order(order)
+            .menu(menu)
+            .quantity(quantity)
+            .unitPrice(unitPrice)
+            .build();
+    }
 }

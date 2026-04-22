@@ -1,6 +1,7 @@
 package com.sparta.deliveryorderplatform.order.entity;
 
 import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
+import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,6 +15,8 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,7 +25,8 @@ import lombok.Setter;
 @Table(name = "p_order")
 @Entity
 @NoArgsConstructor
-@Setter
+@AllArgsConstructor
+@Builder
 public class Order extends BaseAuditEntity {
 
     @Id
@@ -35,7 +39,7 @@ public class Order extends BaseAuditEntity {
     private User user;                              // order를 한 user 식별자
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "sotre_id",nullable = false)
+    @JoinColumn(name = "store_id",nullable = false)
     private Store store;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,10 +48,12 @@ public class Order extends BaseAuditEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "order_type", nullable = false, length = 20)
+    @Builder.Default
     private OrderType orderType = OrderType.ONLINE; // order 유형 , 온라인 혹은 오프라인
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
     private OrderStatus status = OrderStatus.PENDING;// order 상태
 
     @Column(nullable = false)
@@ -55,5 +61,17 @@ public class Order extends BaseAuditEntity {
 
     @Lob
     private String request; // 주문 요청 사항
+
+    // 주문 생성.
+    public static Order createOrder(User user, Store store,  Address address, OrderType orderType,Integer totalPrice, String request) {
+        return Order.builder()
+                    .user(user)
+                    .store(store)
+                    .address(address)
+                    .orderType(orderType)
+                    .totalPrice(totalPrice)
+                    .request(request)
+                    .build();
+    }
 
 }
