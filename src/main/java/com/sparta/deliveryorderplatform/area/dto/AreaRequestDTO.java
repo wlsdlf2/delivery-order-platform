@@ -22,4 +22,6 @@ public class AreaRequestDTO {
     @Size(max = 50, message = "구/군은 50자를 초과할 수 없습니다.")
     private String district;
 
+    private Boolean isActive;
+
 }
