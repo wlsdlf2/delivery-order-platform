@@ -2,6 +2,7 @@ package com.sparta.deliveryorderplatform.review.controller;
 
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
 import com.sparta.deliveryorderplatform.review.dto.request.CreateReviewRequest;
+import com.sparta.deliveryorderplatform.review.dto.request.UpdateReviewRequest;
 import com.sparta.deliveryorderplatform.review.dto.response.ReviewResponse;
 import com.sparta.deliveryorderplatform.review.service.ReviewService;
 import jakarta.validation.Valid;
@@ -43,6 +44,14 @@ public class ReviewController {
     public ResponseEntity<?> getReviewById(@PathVariable UUID reviewId) {
 
         ReviewResponse response = reviewService.getReviewById(reviewId);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PatchMapping("/reviews/{reviewId}")
+    public ResponseEntity<?> updateReview(@PathVariable UUID reviewId, @Valid @RequestBody UpdateReviewRequest request) {
+
+        ReviewResponse response = reviewService.updateReview(reviewId, request);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

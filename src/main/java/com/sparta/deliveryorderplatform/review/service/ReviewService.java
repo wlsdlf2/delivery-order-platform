@@ -3,6 +3,7 @@ package com.sparta.deliveryorderplatform.review.service;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import com.sparta.deliveryorderplatform.review.dto.request.CreateReviewRequest;
+import com.sparta.deliveryorderplatform.review.dto.request.UpdateReviewRequest;
 import com.sparta.deliveryorderplatform.review.dto.response.ReviewResponse;
 import com.sparta.deliveryorderplatform.review.entity.Review;
 import com.sparta.deliveryorderplatform.review.repository.ReviewRepository;
@@ -37,6 +38,16 @@ public class ReviewService {
     public ReviewResponse getReviewById(UUID reviewId) {
 
         return ReviewResponse.from(this.findReviewById(reviewId));
+    }
+
+    @Transactional
+    public ReviewResponse updateReview(UUID reviewId, UpdateReviewRequest request) {
+
+        Review review = this.findReviewById(reviewId);
+
+        review.update(request.getRating(), request.getContent());
+
+        return ReviewResponse.from(review);
     }
 
     private Review findReviewById(UUID id) {

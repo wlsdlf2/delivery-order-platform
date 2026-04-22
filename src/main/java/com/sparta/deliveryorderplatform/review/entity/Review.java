@@ -39,6 +39,11 @@ public class Review extends BaseAuditEntity {
     @Column(columnDefinition = "TEXT")  // null ok
     private String content;
 
+    public void update(Integer rating, String content) {
+        this.rating = rating;
+        this.content = content;
+    }
+
     public static Review create(UUID orderId, UUID storeId, String username, Integer rating, String content) {
         return Review.builder()
                 .orderId(orderId)
