@@ -10,7 +10,6 @@ import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,12 +20,11 @@ import java.util.UUID;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
-    //create
-    // todo? @PreAuthorize("hasRole('MASTER')")
+    //Create
     @Transactional
     public CategoryResponseDTO createCategory(CategoryRequestDTO requestDTO, String username, String role) {
         // 중복 체크
-        if (categoryRepository.existsByName(requestDTO.getName())) {
+        if (categoryRepository.existsByNameAndDeletedAtIsNull(requestDTO.getName())) {
             throw new CustomException(ErrorCode.DUPLICATE_CATEGORY_NAME);
         }
 
@@ -34,7 +32,6 @@ public class CategoryService {
         Category savedCategory = categoryRepository.save(category);
         return CategoryResponseDTO.from(savedCategory);
     }
-
 
     //read
     @Transactional(readOnly = true)
@@ -61,16 +58,16 @@ public class CategoryService {
         Category category = findActiveCategory(categoryId);
 
         // 이름이 변경될 때만 중복 체크
-        if (!category.getName().equals(requestDTO.getName()) && 
-            categoryRepository.existsByName(requestDTO.getName())) {
-            throw new CustomException(ErrorCode.DUPLICATE_CATEGORY_NAME);
+        if (!category.getName().equals(requestDTO.getName())) {
+            if (categoryRepository.existsByNameAndDeletedAtIsNull(requestDTO.getName())) {
+                throw new CustomException(ErrorCode.DUPLICATE_CATEGORY_NAME);
+            }
         }
 
         category.update(requestDTO.getName());
 
         return CategoryResponseDTO.from(category);
     }
-
 
     //delete
     @Transactional
@@ -83,9 +80,7 @@ public class CategoryService {
 
     // 공통 유효성 검증 및 조회
     private Category findActiveCategory(UUID categoryId) {
-        return categoryRepository.findById(categoryId)
-            .filter(c -> c.getDeletedAt() == null)
+        return categoryRepository.findByIdAndDeletedAtIsNull(categoryId)
             .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
     }
-
 }

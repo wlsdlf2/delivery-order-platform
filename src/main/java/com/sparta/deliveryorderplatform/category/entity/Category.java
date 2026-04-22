@@ -21,7 +21,7 @@ public class Category extends BaseAuditEntity {
     @Column(name = "category_id", columnDefinition = "uuid")
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, length = 50)
     private String name;
 
     public static Category create(String name) {
