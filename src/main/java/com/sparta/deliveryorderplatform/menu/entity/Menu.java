@@ -45,4 +45,10 @@ public class Menu extends BaseAuditEntity {
 
         this.store = store;
     }
+
+    public void update(String name, Integer price, String description) {
+        this.name = name;
+        this.price = price;
+        this.description = description;
+    }
 }

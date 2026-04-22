@@ -1,14 +1,15 @@
 package com.sparta.deliveryorderplatform.menu.controller;
 
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
+import com.sparta.deliveryorderplatform.menu.dto.MenuRequestDto;
 import com.sparta.deliveryorderplatform.menu.dto.MenuResponseDto;
 import com.sparta.deliveryorderplatform.menu.service.MenuServcie;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,5 +32,12 @@ public class MenuController {
         Page<MenuResponseDto> menuResponseDto = menuServcie.getMenuList(storeId, page, size);
         return ResponseEntity.ok(ApiResponse.success(menuResponseDto));
 
+    }
+
+    @PutMapping("/menus/{menuId}")
+    public ResponseEntity<?> updateMenu(@PathVariable UUID menuId,
+                                        @Valid @RequestBody MenuRequestDto menuRequestDto) {
+        menuServcie.updateMenu(menuId, menuRequestDto);
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }
