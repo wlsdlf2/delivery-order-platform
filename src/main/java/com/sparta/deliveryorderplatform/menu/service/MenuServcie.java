@@ -6,9 +6,11 @@ import com.sparta.deliveryorderplatform.menu.dto.MenuResponseDto;
 import com.sparta.deliveryorderplatform.menu.entity.Menu;
 import com.sparta.deliveryorderplatform.menu.repository.MenuRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,8 +24,9 @@ public class MenuServcie {
         return new MenuResponseDto(menu);
     }
 
-    public List<MenuResponseDto> getMenuList(UUID storeId) {
-        return menuRepository.findByStore_StoreId(storeId).stream().map(MenuResponseDto::new).toList();
+    public Page<MenuResponseDto> getMenuList(UUID storeId, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return menuRepository.findByStore_StoreIdAndDeletedAtIsNull(storeId, pageRequest).map(MenuResponseDto::new);
     }
 
     private Menu findMenuById(UUID menuId) {
