@@ -7,6 +7,7 @@ import com.sparta.deliveryorderplatform.payment.dto.response.PaymentResponse;
 import com.sparta.deliveryorderplatform.payment.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +34,22 @@ public class PaymentController {
 
         PaymentResponse response = paymentService.createPayment(orderId, request);
         return ApiResponse.success(response);
+    }
+
+    /**
+     * todo : 권한 처리
+     * @return
+     */
+    @GetMapping("/payments")
+    public ResponseEntity<?> getPaymentList(@RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "10") int size) {
+
+        if (size != 10 && size != 30 && size != 50) {
+            size = 10;
+        }
+
+        Page<PaymentResponse> response = paymentService.getPaymentList(page, size);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**

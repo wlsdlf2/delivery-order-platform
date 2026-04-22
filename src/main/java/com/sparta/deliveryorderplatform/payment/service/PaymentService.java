@@ -9,6 +9,9 @@ import com.sparta.deliveryorderplatform.payment.entity.Payment;
 import com.sparta.deliveryorderplatform.payment.entity.PaymentMethod;
 import com.sparta.deliveryorderplatform.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +59,14 @@ public class PaymentService {
         Payment payment = this.findPaymentById(paymentId);
 
         payment.softDelete("user");
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PaymentResponse> getPaymentList(int page, int size) {
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        return paymentRepository.findAll(pageRequest).map(PaymentResponse::from);
     }
 
     private Payment findPaymentById(UUID paymentId) {
