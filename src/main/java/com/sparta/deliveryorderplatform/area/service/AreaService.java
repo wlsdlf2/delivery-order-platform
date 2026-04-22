@@ -4,10 +4,8 @@ import com.sparta.deliveryorderplatform.area.dto.AreaRequestDTO;
 import com.sparta.deliveryorderplatform.area.dto.AreaResponseDTO;
 import com.sparta.deliveryorderplatform.area.entity.Area;
 import com.sparta.deliveryorderplatform.area.repository.AreaRepository;
-import com.sparta.deliveryorderplatform.global.common.ApiResponse;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +18,7 @@ public class AreaService {
 
     private final AreaRepository areaRepository;
 
-    // create todo 권한처리
+    // create
     @Transactional
     public AreaResponseDTO createArea(AreaRequestDTO requestDTO, String username, String role) {
         // 운영지역명 중복 체크
@@ -51,15 +49,21 @@ public class AreaService {
             throw new CustomException(ErrorCode.DUPLICATE_AREA_NAME);
         }
 
-        area.Update(requestDTO.getName(), requestDTO.getCity(), requestDTO.getDistrict());
-    }
+        area.update(requestDTO.getName(), requestDTO.getCity(), requestDTO.getDistrict(), requestDTO.getIsActive());
 
-    // todo? @PreAuthorize("hasRole('MASTER')")
-    @Transactional
-    public AreaResponseDTO updateStatus(UUID areaId, AreaRequestDTO requestDTO) {
-        Area area = findActiveArea(areaId);
-        area.Update(requestDTO.isActive());
+        return AreaResponseDTO.from(area);
     }
 
     // delete
+    @Transactional
+    public AreaResponseDTO deleteArea(UUID areaId, String username) {
+        Area area = findActiveArea(areaId);
+        area.delete(username);
+        return AreaResponseDTO.from(area);
+    }
+
+    private Area findActiveArea(UUID areaId) {
+        return areaRepository.findByIdAndDeletedAtIsNull(areaId)
+            .orElseThrow(() -> new CustomException(ErrorCode.AREA_NOT_FOUND));
+    }
 }

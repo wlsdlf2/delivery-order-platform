@@ -5,6 +5,7 @@ import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -51,23 +52,21 @@ public class Area extends BaseAuditEntity {
     }
 
     // 지역 기본 정보 수정
-    public void updateArea(String name, String city, String district) {
-        if (name == null || city == null || district == null) {
+    public void update(String name, String city, String district, Boolean isActive) {
+        if (!(StringUtils.hasText(name)) || !StringUtils.hasText(city) || !StringUtils.hasText(district)) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR);
         }
 
         this.name = name;
         this.city = city;
         this.district = district;
-    }
-
-    // 운영 지역 활성화/비활성화 스위칭
-    public void updateActiveStatus(boolean isActive) {
-        this.isActive = isActive;
+        if (isActive != null) {
+            this.isActive = isActive;
+        }
     }
 
     // 운영 지역 삭제
-    public void deleteArea(String username) {
+    public void delete(String username) {
         super.softDelete(username);
         this.isActive = false;
     }

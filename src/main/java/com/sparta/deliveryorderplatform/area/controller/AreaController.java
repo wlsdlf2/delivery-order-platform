@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/areas)")
+@RequestMapping("/api/v1/areas")
 @RequiredArgsConstructor
 public class AreaController {
     private final AreaService areaService;
@@ -37,7 +37,7 @@ public class AreaController {
 //    public ApiResponse getAreaById(@PathVariable UUID areaid) {
 //
 //    }
-//
+
     // update
     @PutMapping("/{areaId}")
     public ApiResponse<AreaResponseDTO> updateArea(
@@ -48,10 +48,14 @@ public class AreaController {
     ) {
         return ApiResponse.success(areaService.updateArea(areaId, requestDTO));
     }
-//
-//    // delete
-//    @PatchMapping("/{areaId}")
-//    public ApiResponse deleteArea(@PathVariable UUID areaId) {
-//
-//    }
+
+    // delete
+    @PatchMapping("/{areaId}")
+    public ApiResponse<AreaResponseDTO> deleteArea(
+        @PathVariable UUID areaId,
+        @RequestHeader("X-Username") String username,
+        @RequestHeader("X-Role") String role
+    ) {
+        return ApiResponse.success(areaService.deleteArea(areaId, username));
+    }
 }
