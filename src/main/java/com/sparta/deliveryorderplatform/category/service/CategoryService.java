@@ -38,7 +38,10 @@ public class CategoryService {
 
     //read
     @Transactional(readOnly = true)
-    public Page<CategoryResponseDTO> getCategories(CategorySearchDTO searchDTO, Pageable pageable) {
+    public Page<CategoryResponseDTO> getCategories(CategorySearchDTO searchDTO, String role, Pageable pageable) {
+        // 권한에 따라 검색 조건 결정 : 삭제된 데이터 조회 여부
+        searchDTO.setIsAdmin("MASTER".equals(role));
+
         // 데이터 가져오기(QueryDSL 메서드 호출)
         Page<Category> categoryPage = categoryRepository.searchCategories(searchDTO, pageable);
 

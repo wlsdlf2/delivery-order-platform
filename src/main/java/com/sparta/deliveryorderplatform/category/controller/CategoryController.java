@@ -36,8 +36,7 @@ public class CategoryController {
         @RequestHeader("X-Role") String role,
         Pageable pageable
     ) {
-        searchDTO.setIsAdmin("MASTER".equals(role));
-        return ApiResponse.success(categoryService.getCategories(searchDTO, pageable));
+        return ApiResponse.success(categoryService.getCategories(searchDTO, role, pageable));
     }
 
 
@@ -60,7 +59,7 @@ public class CategoryController {
 
     // delete
     @PatchMapping("/{categoryId}")
-    public ApiResponse deleteCategory(
+    public ApiResponse<CategoryResponseDTO> deleteCategory(
         @PathVariable UUID categoryId,
         @RequestHeader("X-Username") String username,
         @RequestHeader("X-Role")  String role
