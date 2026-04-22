@@ -8,7 +8,10 @@ import lombok.Getter;
 public enum ErrorCode {
 	// 400 BAD_REQUEST(예시)
 	VALIDATION_ERROR(400, "VALIDATION_ERROR", "요청 값이 올바르지 않습니다."),
-	INVALID_PASSWORD(400, "INVALID_PASSWORD", "비밀번호가 올바르지 않습니다."),
+	LOGIN_FAILED(400, "LOGIN_FAILED", "아이디 또는 비밀번호가 일치하지 않습니다."),
+	DUPLICATE_USERNAME(400, "DUPLICATE_USERNAME", "이미 존재하는 아이디입니다."),
+	DUPLICATE_EMAIL(400, "DUPLICATE_EMAIL", "이미 사용 중인 이메일입니다."),
+	INVALID_ROLE_SELECTION(400, "INVALID_ROLE_SELECTION", "가입할 수 없는 권한입니다."),
 
 	// 401 Unauthorized
 	INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),

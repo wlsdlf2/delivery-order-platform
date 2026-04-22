@@ -1,7 +1,8 @@
 package com.sparta.deliveryorderplatform.user.entity;
 
 import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
-import com.sparta.deliveryorderplatform.user.enums.UserRole;
+import com.sparta.deliveryorderplatform.global.exception.CustomException;
+import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,8 +20,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder(access = AccessLevel.PRIVATE)
 public class User extends BaseAuditEntity {
 	@Id
 	@Column(length = 10, nullable = false)
@@ -42,6 +43,23 @@ public class User extends BaseAuditEntity {
 	@Builder.Default
 	@Column(nullable = false)
 	private boolean isPublic = true;	// 사용자 정보 공개 여부(기본값 true)
+
+	public static User createUser(String username, String nickname, String email, String password, UserRole role) {
+		if (username == null || username.isBlank()) throw new CustomException(ErrorCode.VALIDATION_ERROR);
+		if (nickname == null || nickname.isBlank()) throw new CustomException(ErrorCode.VALIDATION_ERROR);
+		if (password == null || password.isBlank()) throw new CustomException(ErrorCode.VALIDATION_ERROR);
+		if (email == null || email.isBlank()) throw new CustomException(ErrorCode.VALIDATION_ERROR);
+		if (role == null) throw new CustomException(ErrorCode.VALIDATION_ERROR);
+
+		return User.builder()
+			.username(username)
+			.nickname(nickname)
+			.email(email)
+			.password(password)
+			.role(role)
+			.isPublic(true)
+			.build();
+	}
 
 	public void updateNickname(String nickname) {
 		this.nickname = nickname;

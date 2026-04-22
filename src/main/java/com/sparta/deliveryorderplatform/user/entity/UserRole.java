@@ -1,4 +1,4 @@
-package com.sparta.deliveryorderplatform.user.enums;
+package com.sparta.deliveryorderplatform.user.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
