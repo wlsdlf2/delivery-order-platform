@@ -49,6 +49,13 @@ public class ReviewController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    /**
+     * 리부 수정 api
+     * todo : 사용자 권한 처리 추가
+     * @param reviewId
+     * @param request
+     * @return
+     */
     @PatchMapping("/reviews/{reviewId}")
     public ResponseEntity<?> updateReview(@PathVariable UUID reviewId, @Valid @RequestBody UpdateReviewRequest request) {
 
