@@ -42,6 +42,10 @@ public class PaymentService {
     @Transactional(readOnly = true)
     public Page<PaymentResponse> getPaymentList(int page, int size) {
 
+        if (size != 10 && size != 30 && size != 50) {
+            size = 10;
+        }
+
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         return paymentRepository.findAllByDeletedAtIsNull(pageRequest).map(PaymentResponse::from);

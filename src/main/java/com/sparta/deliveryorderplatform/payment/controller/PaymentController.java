@@ -44,10 +44,6 @@ public class PaymentController {
     public ResponseEntity<?> getPaymentList(@RequestParam(defaultValue = "0") int page,
                                             @RequestParam(defaultValue = "10") int size) {
 
-        if (size != 10 && size != 30 && size != 50) {
-            size = 10;
-        }
-
         Page<PaymentResponse> response = paymentService.getPaymentList(page, size);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
