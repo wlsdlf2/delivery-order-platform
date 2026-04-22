@@ -15,7 +15,9 @@ import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import com.sparta.deliveryorderplatform.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -74,6 +76,7 @@ public class AuthService {
 
 	@Transactional
 	public void logout(String username) {
-
+		// TODO: 추후 Redis 연결 시 리프레시 토큰 삭제 및 액세스 토큰 블랙리스트 로직 추가
+		log.info("User logged out: {}", username);
 	}
 }
