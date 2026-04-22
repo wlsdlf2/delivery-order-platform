@@ -29,7 +29,7 @@ public class MenuServcie {
 
     public Page<MenuResponseDto> getMenuList(UUID storeId, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return menuRepository.findByStore_StoreIdAndDeletedAtIsNull(storeId, pageRequest).map(MenuResponseDto::new);
+        return menuRepository.findByStore_StoreIdAndDeletedAtIsNullAndIsHiddenFalse(storeId, pageRequest).map(MenuResponseDto::new);
     }
 
     @Transactional
@@ -38,7 +38,20 @@ public class MenuServcie {
         menu.update(menuRequestDto.getName(), menuRequestDto.getPrice(), menuRequestDto.getDescription());
     }
 
+    //TODO sunny - softDelete parameter 수정
+    @Transactional
+    public void deleteMenu(UUID menuId) {
+        Menu menu = findMenuById(menuId);
+        menu.softDelete("admin");
+    }
+
+    @Transactional
+    public void patchMenuStatus(UUID menuId, Boolean isHidden) {
+        Menu menu = findMenuById(menuId);
+        menu.updateStatus(isHidden);
+    }
+
     private Menu findMenuById(UUID menuId) {
-        return menuRepository.findById(menuId).orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
+        return menuRepository.findByMenuIdAndDeletedAtIsNullAndIsHiddenFalse(menuId).orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
     }
 }

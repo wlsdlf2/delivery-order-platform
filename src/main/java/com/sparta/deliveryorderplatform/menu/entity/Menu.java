@@ -34,9 +34,11 @@ public class Menu extends BaseAuditEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "is_hidden")
-    private Boolean isHidden;
+    //default false 처리
+    @Column(name = "is_hidden", columnDefinition = "boolean default false")
+    private Boolean isHidden = false;
 
+    //sunny - addMenu 시 필요한 생성자
     public Menu(MenuRequestDto requestDto, Store store) {
         this.menuId = UUID.randomUUID();
         this.name = requestDto.getName();
@@ -50,5 +52,9 @@ public class Menu extends BaseAuditEntity {
         this.name = name;
         this.price = price;
         this.description = description;
+    }
+
+    public void updateStatus(Boolean isHidden) {
+        this.isHidden = isHidden;
     }
 }

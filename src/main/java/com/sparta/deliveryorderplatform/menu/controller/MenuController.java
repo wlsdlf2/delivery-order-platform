@@ -34,10 +34,26 @@ public class MenuController {
 
     }
 
+    //TODO sunny - 권한 체크 필요
     @PutMapping("/menus/{menuId}")
     public ResponseEntity<?> updateMenu(@PathVariable UUID menuId,
                                         @Valid @RequestBody MenuRequestDto menuRequestDto) {
         menuServcie.updateMenu(menuId, menuRequestDto);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    //TODO sunny - 권한 체크 필요
+    @DeleteMapping("/menus/{menuId}")
+    public ResponseEntity<?> deleteMenu(@PathVariable UUID menuId) {
+        menuServcie.deleteMenu(menuId);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    //TODO sunny - 권한 체크 필요
+    @PatchMapping("/menus/{menuId}/hide")
+    public ResponseEntity<?> patchMenuStatus(@PathVariable UUID menuId,
+                                             @RequestParam Boolean isHidden) {
+        menuServcie.patchMenuStatus(menuId, isHidden);
         return ResponseEntity.ok(ApiResponse.success());
     }
 }

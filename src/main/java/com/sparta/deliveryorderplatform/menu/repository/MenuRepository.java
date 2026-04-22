@@ -5,8 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface MenuRepository extends JpaRepository<Menu, UUID> {
-    Page<Menu> findByStore_StoreIdAndDeletedAtIsNull(UUID storeId, Pageable pageable);
+    Optional<Menu> findByMenuIdAndDeletedAtIsNullAndIsHiddenFalse(UUID menuId);
+
+    Page<Menu> findByStore_StoreIdAndDeletedAtIsNullAndIsHiddenFalse(UUID storeId, Pageable pageable);
 }
