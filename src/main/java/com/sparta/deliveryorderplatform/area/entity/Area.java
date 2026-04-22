@@ -24,7 +24,7 @@ public class Area extends BaseAuditEntity {
     private UUID id;
 
     // 지역명(ex.광화문)
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 100)
     private String name;
 
     //  시 or 도
@@ -40,9 +40,7 @@ public class Area extends BaseAuditEntity {
     private Boolean isActive = true;
 
     public static Area create(String name, String city, String district) {
-        if (name == null || city == null || district == null) {
-            throw new CustomException(ErrorCode.VALIDATION_ERROR);
-        }
+        validateLocation(name, city, district);
 
         return Area.builder()
             .name(name)
@@ -53,9 +51,7 @@ public class Area extends BaseAuditEntity {
 
     // 지역 기본 정보 수정
     public void update(String name, String city, String district, Boolean isActive) {
-        if (!(StringUtils.hasText(name)) || !StringUtils.hasText(city) || !StringUtils.hasText(district)) {
-            throw new CustomException(ErrorCode.VALIDATION_ERROR);
-        }
+        validateLocation(name, city, district);
 
         this.name = name;
         this.city = city;
@@ -71,4 +67,13 @@ public class Area extends BaseAuditEntity {
         this.isActive = false;
     }
 
+    private static void validateLocation(String name, String city, String district) {
+        if (isInvalid(name) || isInvalid(city) || isInvalid(district)) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR);
+        }
+    }
+
+    private static boolean isInvalid(String str) {
+        return str == null || str.isBlank();
+    }
 }
