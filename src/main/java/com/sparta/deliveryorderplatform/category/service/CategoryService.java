@@ -10,6 +10,7 @@ import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,15 +22,17 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
 
     //create
+    // todo? @PreAuthorize("hasRole('MASTER')")
     @Transactional
     public CategoryResponseDTO createCategory(CategoryRequestDTO requestDTO, String username, String role) {
-        // TODO: 회원 기능 담당자가 권한 체크 AOP 도입 시 아래 if문 삭제 예정
-        if (!"MASTER".equals(role)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        // 중복 체크
+        if (categoryRepository.existsByName(requestDTO.getName())) {
+            throw new CustomException(ErrorCode.DUPLICATE_CATEGORY_NAME);
         }
-        Category category = Category.createCategory(requestDTO, username);
+
+        Category category = Category.create(requestDTO.getName());
         Category savedCategory = categoryRepository.save(category);
-        return CategoryResponseDTO.form(savedCategory);
+        return CategoryResponseDTO.from(savedCategory);
     }
 
 
@@ -40,31 +43,39 @@ public class CategoryService {
         Page<Category> categoryPage = categoryRepository.searchCategories(searchDTO, pageable);
 
         // entity -> dto(리턴)
-        return categoryPage.map(category -> CategoryResponseDTO.form(category));
+        return categoryPage.map(category -> CategoryResponseDTO.from(category));
     }
 
     @Transactional(readOnly = true)
     public CategoryResponseDTO getCategoryById(UUID categoryId) {
         Category category = findActiveCategory(categoryId);
-        return CategoryResponseDTO.form(category);
+        return CategoryResponseDTO.from(category);
     }
 
     //update
     @Transactional
-    public CategoryResponseDTO updateCategory(UUID categoryId, CategoryRequestDTO requestDTO, String username) {
+    public CategoryResponseDTO updateCategory(UUID categoryId, CategoryRequestDTO requestDTO) {
         Category category = findActiveCategory(categoryId);
-        category.updateCategory(requestDTO.getName(), username);
 
-        return CategoryResponseDTO.form(category);
+        // 이름이 변경될 때만 중복 체크
+        if (!category.getName().equals(requestDTO.getName()) && 
+            categoryRepository.existsByName(requestDTO.getName())) {
+            throw new CustomException(ErrorCode.DUPLICATE_CATEGORY_NAME);
+        }
+
+        category.update(requestDTO.getName());
+
+        return CategoryResponseDTO.from(category);
     }
+
 
     //delete
     @Transactional
     public CategoryResponseDTO deleteCategory(UUID categoryId, String username) {
         Category category = findActiveCategory(categoryId);
-        category.deleteCategory(username);
+        category.delete(username);
 
-        return CategoryResponseDTO.form(category);
+        return CategoryResponseDTO.from(category);
     }
 
     // 공통 유효성 검증 및 조회

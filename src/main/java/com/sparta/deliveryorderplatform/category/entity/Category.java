@@ -1,11 +1,11 @@
 package com.sparta.deliveryorderplatform.category.entity;
 
-import com.sparta.deliveryorderplatform.category.dto.CategoryRequestDTO;
 import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
+import com.sparta.deliveryorderplatform.global.exception.CustomException;
+import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -24,25 +24,25 @@ public class Category extends BaseAuditEntity {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
-    public static Category createCategory(CategoryRequestDTO requestDTO, String username) {
-        if (requestDTO.getName() == null || requestDTO.getName().isBlank()) {
-            throw new IllegalArgumentException("카테고리명 누락");
+    public static Category create(String name) {
+        if (name == null || name.isBlank()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR);
         }
 
         return Category.builder()
-            .name(requestDTO.getName())
+            .name(name)
             .build();
     }
 
-    public void updateCategory(String name, String username) {
+    public void update(String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("카테고리명 누락");
+            throw new CustomException(ErrorCode.VALIDATION_ERROR);
         }
 
         this.name = name;
     }
 
-    public void deleteCategory(String username) {
+    public void delete(String username) {
         super.softDelete(username);
     }
 }

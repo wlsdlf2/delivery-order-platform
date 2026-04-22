@@ -18,7 +18,7 @@ public class CategoryResponseDTO {
     private LocalDateTime updatedAt;
     private String updatedBy;
 
-    public static CategoryResponseDTO form(Category category) {
+    public static CategoryResponseDTO from(Category category) {
         return CategoryResponseDTO.builder()
                 .id(category.getId())
                 .name(category.getName())
