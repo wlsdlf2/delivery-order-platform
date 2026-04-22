@@ -30,7 +30,9 @@ public class PaymentService {
             throw new CustomException(ErrorCode.INVALID_PAYMENT_METHOD);
         }
 
-        Payment payment = Payment.create(orderId, 0);   // 결제 금액 주문 테이블에서 가져와야 하나?
+        // 실제 주문 금액이랑 결제 요청 금액 비교 로직 추가
+
+        Payment payment = Payment.create(orderId, request.getAmount());
 
         paymentRepository.save(payment);
 

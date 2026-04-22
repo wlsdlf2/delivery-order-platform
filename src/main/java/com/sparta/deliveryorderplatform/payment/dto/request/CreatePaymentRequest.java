@@ -11,4 +11,7 @@ public class CreatePaymentRequest {
 
     @NotNull
     private PaymentMethod paymentMethod;
+
+    @NotNull
+    private Integer amount;
 }
