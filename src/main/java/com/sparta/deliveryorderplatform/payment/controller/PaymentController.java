@@ -30,10 +30,10 @@ public class PaymentController {
      * @return
      */
     @PostMapping("/orders/{orderId}/payments")
-    public ApiResponse<?> createPayment(@PathVariable UUID orderId, @Valid @RequestBody CreatePaymentRequest request) {
+    public ResponseEntity<?> createPayment(@PathVariable UUID orderId, @Valid @RequestBody CreatePaymentRequest request) {
 
         PaymentResponse response = paymentService.createPayment(orderId, request);
-        return ApiResponse.success(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
@@ -58,10 +58,10 @@ public class PaymentController {
      * @return
      */
     @GetMapping("/payments/{paymentId}")
-    public ApiResponse<?> getPaymentById(@PathVariable UUID paymentId) {
+    public ResponseEntity<?> getPaymentById(@PathVariable UUID paymentId) {
 
         PaymentResponse response = paymentService.getPaymentById(paymentId);
-        return ApiResponse.success(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
@@ -72,11 +72,11 @@ public class PaymentController {
      * @return
      */
     @PatchMapping("/payments/{paymentId}")
-    public ApiResponse<?> updatePaymentStatus(@PathVariable UUID paymentId,
+    public ResponseEntity<?> updatePaymentStatus(@PathVariable UUID paymentId,
                                               @Valid @RequestBody UpdatePaymentStatusRequest request) {
 
         PaymentResponse response = paymentService.updatePaymentStatus(paymentId, request);
-        return ApiResponse.success(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
