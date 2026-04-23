@@ -42,7 +42,7 @@ public class User extends BaseAuditEntity {
 
 	@Builder.Default
 	@Column(nullable = false)
-	private boolean isPublic = true;	// 사용자 정보 공개 여부(기본값 true)
+	private Boolean isPublic = true;	// 사용자 정보 공개 여부(기본값 true)
 
 	public static User createUser(String username, String nickname, String email, String password, UserRole role) {
 		if (username == null || username.isBlank()) throw new CustomException(ErrorCode.VALIDATION_ERROR);
@@ -61,7 +61,27 @@ public class User extends BaseAuditEntity {
 			.build();
 	}
 
-	public void updateNickname(String nickname) {
-		this.nickname = nickname;
+	public void updateProfile(String nickname, String email, Boolean isPublic) {
+		if (nickname != null && !nickname.isBlank()) {
+			this.nickname = nickname;
+		}
+		if (email != null && !email.isBlank()) {
+			this.email = email;
+		}
+		if (isPublic != null) {
+			this.isPublic = isPublic;
+		}
+	}
+
+	public void updatePassword(String encodedPassword) {
+		this.password = encodedPassword;
+	}
+
+	public void updateRole(UserRole newRole) {
+		if (newRole == null) {
+			throw new CustomException(ErrorCode.INVALID_ROLE_SELECTION);
+		}
+
+		this.role = newRole;
 	}
 }
