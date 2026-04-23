@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -26,17 +28,18 @@ public class ReviewController {
 
     /**
      * 리뷰 등록 api
-     * todo : 권한 처리, 주문 상태가 COMPLETED인 경우만 등록 가능
-     * todo : user, store, order 찾는 로직 추가
+     * todo : 주문 상태가 COMPLETED인 경우만 등록 가능
+     * todo : store, order 처리 로직 추가해야 함
      * @param orderId
      * @param request
      * @return
      */
     @PostMapping("/orders/{orderId}/reviews")
     public ResponseEntity<?> createReview(@PathVariable UUID orderId,
-                                          @Valid @RequestBody CreateReviewRequest request) {
+                                          @Valid @RequestBody CreateReviewRequest request,
+                                          @AuthenticationPrincipal String username) {
 
-        ReviewResponse response = reviewService.createReview(orderId, "tmp", request);
+        ReviewResponse response = reviewService.createReview(orderId, username, request);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -69,29 +72,37 @@ public class ReviewController {
 
     /**
      * 리부 수정 api
-     * todo : 사용자 권한 처리 추가
      * @param reviewId
      * @param request
+     * @param authentication
      * @return
      */
     @PatchMapping("/reviews/{reviewId}")
-    public ResponseEntity<?> updateReview(@PathVariable UUID reviewId, @Valid @RequestBody UpdateReviewRequest request) {
+    public ResponseEntity<?> updateReview(@PathVariable UUID reviewId,
+                                          @Valid @RequestBody UpdateReviewRequest request,
+                                          Authentication authentication) {
 
-        ReviewResponse response = reviewService.updateReview(reviewId, request);
+        String username = (String) authentication.getPrincipal();
+
+        ReviewResponse response = reviewService.updateReview(reviewId, request, username);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
      * 리뷰 삭제 api
-     * todo : 사용자 권한 처리 추가
      * @param reviewId
+     * @param authentication
      * @return
      */
     @DeleteMapping("/reviews/{reviewId}")
-    public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId) {
+    public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId,
+                                          Authentication authentication) {
 
-        reviewService.deleteReview(reviewId, "tmp");
+        String username = (String) authentication.getPrincipal();
+        String role = authentication.getAuthorities().iterator().next().getAuthority();
+
+        reviewService.deleteReview(reviewId, username, role);
 
         return ResponseEntity.ok(ApiResponse.success());
     }

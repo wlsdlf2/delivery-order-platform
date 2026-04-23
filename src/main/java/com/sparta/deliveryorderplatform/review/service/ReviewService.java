@@ -8,6 +8,9 @@ import com.sparta.deliveryorderplatform.review.dto.request.UpdateReviewRequest;
 import com.sparta.deliveryorderplatform.review.dto.response.ReviewResponse;
 import com.sparta.deliveryorderplatform.review.entity.Review;
 import com.sparta.deliveryorderplatform.review.repository.ReviewRepository;
+import com.sparta.deliveryorderplatform.user.entity.User;
+import com.sparta.deliveryorderplatform.user.entity.UserRole;
+import com.sparta.deliveryorderplatform.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,18 +26,23 @@ import java.util.UUID;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public ReviewResponse createReview(UUID orderId, String username, CreateReviewRequest request) {
+    public ReviewResponse createReview(UUID orderId, String username,
+                                       CreateReviewRequest request) {
 
-        // Order 찾는 로직
+        // Order 찾는 로직(1주문 1리뷰), 주문 상태가 Completed인 경우에만 ㄱㄴ
 
         // User 찾는 로직
+        User user = userRepository.findById(username).orElseThrow(
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
 
         // store 찾는 로직
 
         Review review = Review.create(orderId, request.getStoreId(),
-                username, request.getRating(), request.getContent());
+                user, request.getRating(), request.getContent());
 
         return ReviewResponse.from(reviewRepository.save(review));
     }
@@ -64,9 +72,14 @@ public class ReviewService {
     }
 
     @Transactional
-    public ReviewResponse updateReview(UUID reviewId, UpdateReviewRequest request) {
+    public ReviewResponse updateReview(UUID reviewId, UpdateReviewRequest request, String username) {
 
         Review review = this.findReviewById(reviewId);
+
+        // 본인 리뷰만 수정 가능하도록
+        if (!review.getUser().getUsername().equals(username)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         review.update(request.getRating(), request.getContent());
 
@@ -74,9 +87,14 @@ public class ReviewService {
     }
 
     @Transactional
-    public void deleteReview(UUID reviewId, String username) {
+    public void deleteReview(UUID reviewId, String username, String role) {
 
         Review review = this.findReviewById(reviewId);
+
+        // 본인 리뷰만 삭제 가능(manager&master는 모두 허용)
+        if (role.equals(UserRole.CUSTOMER.getAuthority()) && !review.getUser().getUsername().equals(username)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         review.softDelete(username);
     }
