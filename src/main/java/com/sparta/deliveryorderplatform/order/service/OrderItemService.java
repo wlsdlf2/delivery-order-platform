@@ -1,23 +1,23 @@
-package com.sparta.deliveryorderplatform.order.service;
-
-import com.sparta.deliveryorderplatform.order.dto.OrderItemRequestDto;
-import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
-import com.sparta.deliveryorderplatform.order.entity.Order;
-import com.sparta.deliveryorderplatform.order.entity.OrderItem;
-import com.sparta.deliveryorderplatform.order.repository.OrderItemRepository;
-import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
-import java.awt.Menu;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-@Service
-@Transactional(readOnly = true)
-public class OrderItemService {
-
+//package com.sparta.deliveryorderplatform.order.service;
+//
+//import com.sparta.deliveryorderplatform.order.dto.OrderItemRequestDto;
+//import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
+//import com.sparta.deliveryorderplatform.order.entity.Order;
+//import com.sparta.deliveryorderplatform.order.entity.OrderItem;
+//import com.sparta.deliveryorderplatform.order.repository.OrderItemRepository;
+//import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
+//import java.awt.Menu;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.UUID;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.stereotype.Service;
+//import org.springframework.transaction.annotation.Transactional;
+//
+//@Service
+//@Transactional(readOnly = true)
+//public class OrderItemService {
+//
 //    @Autowired
 //    private OrderRepository orderRepository;
 //    @Autowired
@@ -47,5 +47,5 @@ public class OrderItemService {
 //
 //        orderItemRepository.saveAll(orderItems); // 이 리스트를 모두 DB에 저장.
 //    }
-
-}
+//
+//}

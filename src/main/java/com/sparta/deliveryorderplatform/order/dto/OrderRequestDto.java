@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
 public class OrderRequestDto {
     @NotNull(message = "가게는 반드시 지정되어야 합니다.")
-    private UUID sotreId;
+    private UUID storeId;
 
     @NotNull(message = "주소는 반드시 지정해야 합니다.")
     private UUID addressId;

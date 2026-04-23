@@ -1,24 +1,24 @@
-package com.sparta.deliveryorderplatform.order.service;
-
-import com.sparta.deliveryorderplatform.order.dto.OrderItemRequestDto;
-import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
-import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
-import com.sparta.deliveryorderplatform.order.entity.Order;
-import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
-import java.awt.Menu;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-@Service
-@Transactional(readOnly = true)
-public class OrderService {
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    //현재는 오류가 발생하므로, 주석 처리
+//package com.sparta.deliveryorderplatform.order.service;
+//
+//import com.sparta.deliveryorderplatform.order.dto.OrderItemRequestDto;
+//import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
+//import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
+//import com.sparta.deliveryorderplatform.order.entity.Order;
+//import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
+//import java.awt.Menu;
+//import java.util.List;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.stereotype.Service;
+//import org.springframework.transaction.annotation.Transactional;
+//
+//@Service
+//@Transactional(readOnly = true)
+//public class OrderService {
+//
+//    @Autowired
+//    private OrderRepository orderRepository;
+//
+//    //현재는 오류가 발생하므로, 주석 처리
 //    @Autowired
 //    private UserRepository userRepository;
 //
@@ -30,13 +30,13 @@ public class OrderService {
 //
 //    @Autowired
 //    private MenuRepository menuRepository;
-
-    /**
-     * 주문 생성 - 주문 테이블만
-     * @param orderRequestDto : 주문 요청
-     * @param username        : 사용자 식별자
-     * @return                : 생성된 주문을 응답.
-     */
+//
+//    /**
+//     * 주문 생성 - 주문 테이블만
+//     * @param orderRequestDto : 주문 요청
+//     * @param username        : 사용자 식별자
+//     * @return                : 생성된 주문을 응답.
+//     */
 //    @Transactional
 //    public OrderResponseDto createOrder(OrderRequestDto orderRequestDto, String username) {
 //        //현재는 오류가 나므로 주석 처리
@@ -45,7 +45,7 @@ public class OrderService {
 //            new IllegalAccessError("사용자가 없습니다."));
 //
 //        //storeId로 Store 조회
-//        Store store = storeRepository.findById(orderRequestDto.getSotreId()).orElseThrow(() ->
+//        Store store = storeRepository.findById(orderRequestDto.getStoreId()).orElseThrow(() ->
 //            new IllegalAccessError("가게가 없습니다."));
 //
 //        //addressId로 Address 조회
@@ -72,8 +72,8 @@ public class OrderService {
 //        orderRepository.save(newOrder); // DB에 저장.
 //        return OrderResponseDto.from(newOrder);
 //    }
-
-
-
-
-}
+//
+//
+//
+//
+//}
