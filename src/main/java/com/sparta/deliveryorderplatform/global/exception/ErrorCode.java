@@ -13,6 +13,12 @@ public enum ErrorCode {
 	DUPLICATE_EMAIL(400, "DUPLICATE_EMAIL", "이미 사용 중인 이메일입니다."),
 	INVALID_ROLE_SELECTION(400, "INVALID_ROLE_SELECTION", "가입할 수 없는 권한입니다."),
 
+	// payment
+	INVALID_PAYMENT_METHOD(400, "INVALID_PAYMENT_METHOD", "올바른 결제 수단을 선택해 주세요"),
+	PAYMENT_NOT_FOUND(404, "PAYMENT_NOT_FOUND", "결제 정보를 찾을 수 없습니다."),
+	ALREADY_CANCELLED(400, "ALREADY_CANCELLED", "이미 취소된 결제입니다."),
+	INVALID_PAYMENT_STATUS(400, "INVALID_PAYMENT_STATUS", "유효하지 않은 결제 상태 변경입니다."),
+
 	// 401 Unauthorized
 	INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
 	EXPIRED_TOKEN(401, "EXPIRED_TOKEN", "만료된 토큰입니다."),
