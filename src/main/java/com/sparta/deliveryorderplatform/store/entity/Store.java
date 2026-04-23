@@ -5,6 +5,7 @@ import com.sparta.deliveryorderplatform.category.entity.Category;
 import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.util.StringUtils;
@@ -24,10 +25,10 @@ public class Store extends BaseAuditEntity {
     @Column(name = "store_id", columnDefinition = "uuid")
     private UUID id;
 
-    // TODO: User 엔티티 연관관계 (username 매핑)
-    // 현재 임시 String으로 유지하거나 User 엔티티가 있으면 변경 필요
-    @Column(name = "owner_id", nullable = false)
-    private String ownerId;
+    // 연관관계 매핑: 가게 소유자 (User 엔티티의 username 필드와 매핑)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", referencedColumnName = "username", nullable = false)
+    private User owner;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
@@ -46,6 +47,7 @@ public class Store extends BaseAuditEntity {
     @Column(length = 20)
     private String phone;
 
+    // 캐싱 컬럼
     @Column(columnDefinition = "numeric")
     @Builder.Default
     private Double averageRating = 0.0;
@@ -53,21 +55,21 @@ public class Store extends BaseAuditEntity {
     @Builder.Default
     private Boolean isHidden = false;
 
-    public static Store create(String name, String address, String phone, String ownerId, Category category, Area area) {
-        validateStore(name, address, ownerId, category, area);
+    public static Store create(String name, String address, String phone, User owner, Category category, Area area) {
+        validateStore(name, address, owner, category, area);
 
         return Store.builder()
                 .name(name)
                 .address(address)
                 .phone(phone)
-                .ownerId(ownerId)
+                .owner(owner)
                 .category(category)
                 .area(area)
                 .build();
     }
 
     public void update(String name, String address, String phone, Category category, Area area, Boolean isHidden) {
-        validateStore(name, address, this.ownerId, category, area);
+        validateStore(name, address, owner, category, area);
 
         this.name = name;
         this.address = address;
@@ -79,16 +81,22 @@ public class Store extends BaseAuditEntity {
         }
     }
 
-    public void delete(String username) {
-        super.softDelete(username);
-        this.isHidden = true;
+    public void updateVisibility(Boolean isHidden) {
+        if (isHidden != null) {
+            this.isHidden = isHidden;
+        }
     }
 
-    private static void validateStore(String name, String address, String ownerId, Category category, Area area) {
-        if (!StringUtils.hasText(name) || !StringUtils.hasText(address) || !StringUtils.hasText(ownerId)) {
+    public void delete(String username) {
+        super.softDelete(username);
+        this.isHidden = true;   // 가게 삭제 시 숨김 처리
+    }
+
+    private static void validateStore(String name, String address, User owner, Category category, Area area) {
+        if (!StringUtils.hasText(name) || !StringUtils.hasText(address)) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR);
         }
-        if (category == null || area == null) {
+        if (category == null || area == null || owner == null) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR);
         }
     }

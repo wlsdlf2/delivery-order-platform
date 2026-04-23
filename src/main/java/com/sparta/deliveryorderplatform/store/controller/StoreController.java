@@ -4,6 +4,7 @@ import com.sparta.deliveryorderplatform.global.common.ApiResponse;
 import com.sparta.deliveryorderplatform.global.common.PageResponse;
 import com.sparta.deliveryorderplatform.store.dto.StoreRequestDTO;
 import com.sparta.deliveryorderplatform.store.dto.StoreResponseDTO;
+import com.sparta.deliveryorderplatform.store.dto.StoreVisibilityRequestDTO;
 import com.sparta.deliveryorderplatform.store.service.StoreService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,17 @@ public class StoreController {
         return ResponseEntity.ok(ApiResponse.success(storeService.updateStore(storeId, requestDTO)));
     }
 
-    // delete (MASTER 권한만 가능하다고 가정)
+    // hide 가게 숨김 여부 수정 (PATCH)
+    @PatchMapping("/api/v1/stores/{storeId}/hide")
+    @PreAuthorize("hasAnyAuthority('OWNER', 'MASTER')")
+    public ResponseEntity<ApiResponse<StoreResponseDTO>> updateStoreVisibility(
+            @PathVariable UUID storeId,
+            @Valid @RequestBody StoreVisibilityRequestDTO requestDTO
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(storeService.updateVisibility(storeId, requestDTO.getIsHidden())));
+    }
+
+    // delete
     @PatchMapping("/api/v1/stores/{storeId}")
     @PreAuthorize("hasAnyAuthority('OWNER', 'MASTER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> deleteStore(

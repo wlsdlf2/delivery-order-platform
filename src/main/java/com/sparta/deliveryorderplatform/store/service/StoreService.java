@@ -10,6 +10,8 @@ import com.sparta.deliveryorderplatform.store.dto.StoreRequestDTO;
 import com.sparta.deliveryorderplatform.store.dto.StoreResponseDTO;
 import com.sparta.deliveryorderplatform.store.entity.Store;
 import com.sparta.deliveryorderplatform.store.repository.StoreRepository;
+import com.sparta.deliveryorderplatform.user.entity.User;
+import com.sparta.deliveryorderplatform.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,17 +27,22 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final CategoryRepository categoryRepository;
     private final AreaRepository areaRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public StoreResponseDTO createStore(StoreRequestDTO requestDTO, String username) {
-        Category category = categoryRepository.getReferenceById(requestDTO.getCategoryId());
-        Area area = areaRepository.getReferenceById(requestDTO.getAreaId());
+        Category category = categoryRepository.findByIdAndDeletedAtIsNull(requestDTO.getCategoryId())
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+        Area area = areaRepository.findByIdAndDeletedAtIsNull(requestDTO.getAreaId())
+                .orElseThrow(() -> new CustomException(ErrorCode.AREA_NOT_FOUND));
+        User owner = userRepository.findById(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_ACCESS)); // 또는 적절한 유저 미존재 에러
 
         Store store = Store.create(
                 requestDTO.getName(),
                 requestDTO.getAddress(),
                 requestDTO.getPhone(),
-                username, // ownerId를 현재 로그인 유저로 설정
+                owner, // User 객체 전달
                 category,
                 area
         );
@@ -62,8 +69,10 @@ public class StoreService {
     public StoreResponseDTO updateStore(UUID storeId, StoreRequestDTO requestDTO) {
         Store store = findStoreById(storeId);
         
-        Category category = categoryRepository.getReferenceById(requestDTO.getCategoryId());
-        Area area = areaRepository.getReferenceById(requestDTO.getAreaId());
+        Category category = categoryRepository.findByIdAndDeletedAtIsNull(requestDTO.getCategoryId())
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+        Area area = areaRepository.findByIdAndDeletedAtIsNull(requestDTO.getAreaId())
+                .orElseThrow(() -> new CustomException(ErrorCode.AREA_NOT_FOUND));
 
         store.update(
                 requestDTO.getName(),
@@ -74,6 +83,13 @@ public class StoreService {
                 requestDTO.getIsHidden()
         );
 
+        return StoreResponseDTO.from(store);
+    }
+
+    @Transactional
+    public StoreResponseDTO updateVisibility(UUID storeId, Boolean isHidden) {
+        Store store = findStoreById(storeId);
+        store.updateVisibility(isHidden);
         return StoreResponseDTO.from(store);
     }
 
