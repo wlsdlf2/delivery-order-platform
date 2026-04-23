@@ -24,15 +24,16 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
 
     @Transactional
-    public PaymentResponse createPayment(UUID orderId, CreatePaymentRequest request) {
+    public PaymentResponse createPayment(UUID orderId, CreatePaymentRequest request, String username) {
 
         if (request.getPaymentMethod() != PaymentMethod.CARD) {
             throw new CustomException(ErrorCode.INVALID_PAYMENT_METHOD);
         }
 
         // 실제 주문 금액이랑 결제 요청 금액 비교 로직 추가
+        // 주문한 사람이랑 결제 요청한 사람이랑 비교 로직 추가
 
-        Payment payment = Payment.create(orderId, request.getAmount());
+        Payment payment = Payment.create(orderId, request.getAmount(), username);
 
         paymentRepository.save(payment);
 

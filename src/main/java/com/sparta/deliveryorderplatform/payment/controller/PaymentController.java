@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -24,15 +25,17 @@ public class PaymentController {
     /**
      * 결제 처리 api
      * todo : 권한 처리, 주문 정보 받아와서 금액 등 넣어야 함
-     * todo : 결제 상태에 관해 고민해봐야 할듯
      * @param orderId
      * @param request
      * @return
      */
     @PostMapping("/orders/{orderId}/payments")
-    public ResponseEntity<?> createPayment(@PathVariable UUID orderId, @Valid @RequestBody CreatePaymentRequest request) {
+    public ResponseEntity<?> createPayment(@PathVariable UUID orderId,
+                                           @Valid @RequestBody CreatePaymentRequest request,
+                                           @AuthenticationPrincipal String username) {
 
-        PaymentResponse response = paymentService.createPayment(orderId, request);
+        PaymentResponse response = paymentService.createPayment(orderId, request, username);
+
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

@@ -24,6 +24,8 @@ public class PaymentResponse {
 
     private Integer amount;
 
+    private String username;
+
     public static PaymentResponse from(Payment payment) {
         return PaymentResponse.builder()
                 .paymentId(payment.getId())
@@ -31,6 +33,7 @@ public class PaymentResponse {
                 .paymentStatus(payment.getPaymentStatus())
                 .paymentMethod(payment.getPaymentMethod())
                 .amount(payment.getAmount())
+                .username(payment.getUsername())
                 .build();
     }
 }

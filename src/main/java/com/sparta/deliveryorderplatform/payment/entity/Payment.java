@@ -48,6 +48,7 @@ public class Payment extends BaseAuditEntity {
                 .orderId(orderId)
                 .amount(amount)
                 .username(username)
+                .paymentStatus(PaymentStatus.COMPLETED)
                 .build();
     }
 
