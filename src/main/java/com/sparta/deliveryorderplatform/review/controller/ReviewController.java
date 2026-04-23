@@ -28,7 +28,7 @@ public class ReviewController {
 
     /**
      * 리뷰 등록 api
-     * todo : 주문 상태가 COMPLETED인 경우만 등록 가능
+     * todo : 주문 상태가 COMPLETED인 경우만 등록 가능, 본인 주문 건에만 리뷰 등록 가능
      * todo : store, order 처리 로직 추가해야 함
      * @param orderId
      * @param request
