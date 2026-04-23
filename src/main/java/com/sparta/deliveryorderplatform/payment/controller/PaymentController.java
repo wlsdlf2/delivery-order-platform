@@ -92,15 +92,16 @@ public class PaymentController {
 
     /**
      * 결제 삭제 api(soft delete)
-     * todo : 권한 처리
      * @param paymentId
+     * @param username
      * @return
      */
     @PreAuthorize("hasRole('MASTER')")
     @DeleteMapping("/payments/{paymentId}")
-    public ResponseEntity<?> deletePayment(@PathVariable UUID paymentId) {
+    public ResponseEntity<?> deletePayment(@PathVariable UUID paymentId,
+                                           @AuthenticationPrincipal String username) {
 
-        paymentService.deletePayment(paymentId);
+        paymentService.deletePayment(paymentId, username);
 
         return ResponseEntity.ok(ApiResponse.success());
     }

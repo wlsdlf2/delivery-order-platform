@@ -79,11 +79,11 @@ public class PaymentService {
     }
 
     @Transactional
-    public void deletePayment(UUID paymentId) {
+    public void deletePayment(UUID paymentId, String username) {
 
         Payment payment = this.findPaymentById(paymentId);
 
-        payment.softDelete("user");
+        payment.softDelete(username);
     }
 
     private Payment findPaymentById(UUID paymentId) {
