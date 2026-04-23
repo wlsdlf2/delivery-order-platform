@@ -1,6 +1,7 @@
 package com.sparta.deliveryorderplatform.review.entity;
 
 import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
+import com.sparta.deliveryorderplatform.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -29,8 +30,9 @@ public class Review extends BaseAuditEntity {
     @Column(nullable = false)
     private UUID storeId;
 
-    @Column(nullable = false)
-    private String username;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Min(1) @Max(5)
     @Column(nullable = false)
@@ -44,11 +46,11 @@ public class Review extends BaseAuditEntity {
         this.content = content;
     }
 
-    public static Review create(UUID orderId, UUID storeId, String username, Integer rating, String content) {
+    public static Review create(UUID orderId, UUID storeId, User user, Integer rating, String content) {
         return Review.builder()
                 .orderId(orderId)
                 .storeId(storeId)
-                .username(username)
+                .user(user)
                 .rating(rating)
                 .content(content)
                 .build();
