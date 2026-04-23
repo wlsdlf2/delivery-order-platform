@@ -1,6 +1,5 @@
 package com.sparta.deliveryorderplatform.order.dto;
 
-import com.sparta.deliveryorderplatform.order.entity.OrderItem;
 import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
 import com.sparta.deliveryorderplatform.order.entity.OrderType;
 import jakarta.validation.constraints.NotEmpty;
