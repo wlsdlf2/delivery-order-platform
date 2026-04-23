@@ -24,24 +24,30 @@ public class Payment extends BaseAuditEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
     private UUID orderId;
 
-    @Enumerated(EnumType.STRING)
     @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PaymentMethod paymentMethod = PaymentMethod.CARD;
 
-    @Enumerated(EnumType.STRING)
     @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
+    @Column(nullable = false)
     private Integer amount;
 
-    // audit field
+    @Column(nullable = false)
+    private String username;
 
-    public static Payment create(UUID orderId, Integer amount) {
+    public static Payment create(UUID orderId, Integer amount, String username) {
         return Payment.builder()
                 .orderId(orderId)
                 .amount(amount)
+                .username(username)
                 .build();
     }
 
