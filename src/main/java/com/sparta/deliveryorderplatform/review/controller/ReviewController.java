@@ -51,7 +51,7 @@ public class ReviewController {
 
         Page<ReviewResponse> response = reviewService.getReviewList(request, pageable);
 
-        return ResponseEntity.ok(PageResponse.of(response));
+        return ResponseEntity.ok(ApiResponse.success(PageResponse.of(response)));
     }
 
     /**
