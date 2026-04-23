@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -59,7 +60,6 @@ public class PaymentController {
 
     /**
      * 결제 상세 조회 api
-     * todo : 권한 처리 해야 함, Payment에도 userId 추가하는 게 나아보임
      * @return
      */
     @GetMapping("/payments/{paymentId}")
@@ -76,16 +76,17 @@ public class PaymentController {
 
     /**
      * 결제 상태 수정 api
-     * todo : 권한 처리
      * @param paymentId
      * @param request
      * @return
      */
+    @PreAuthorize("hasRole('MASTER')")
     @PatchMapping("/payments/{paymentId}")
     public ResponseEntity<?> updatePaymentStatus(@PathVariable UUID paymentId,
-                                              @Valid @RequestBody UpdatePaymentStatusRequest request) {
+                                                 @Valid @RequestBody UpdatePaymentStatusRequest request) {
 
         PaymentResponse response = paymentService.updatePaymentStatus(paymentId, request);
+
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
