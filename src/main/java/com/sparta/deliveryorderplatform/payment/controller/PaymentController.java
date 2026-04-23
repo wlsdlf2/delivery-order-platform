@@ -41,7 +41,7 @@ public class PaymentController {
     }
 
     /**
-     * todo : 권한 처리
+     * 결제 목록 조회 api
      * @return
      */
     @GetMapping("/payments")
@@ -53,6 +53,7 @@ public class PaymentController {
         String role = authentication.getAuthorities().iterator().next().getAuthority();
 
         Page<PaymentResponse> response = paymentService.getPaymentList(page, size, username, role);
+
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -62,9 +63,14 @@ public class PaymentController {
      * @return
      */
     @GetMapping("/payments/{paymentId}")
-    public ResponseEntity<?> getPaymentById(@PathVariable UUID paymentId) {
+    public ResponseEntity<?> getPaymentById(@PathVariable UUID paymentId,
+                                            Authentication authentication) {
 
-        PaymentResponse response = paymentService.getPaymentById(paymentId);
+        String username = (String) authentication.getPrincipal();
+        String role = authentication.getAuthorities().iterator().next().getAuthority();
+
+        PaymentResponse response = paymentService.getPaymentById(paymentId, username, role);
+
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

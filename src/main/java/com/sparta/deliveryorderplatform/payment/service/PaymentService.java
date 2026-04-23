@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,9 +56,16 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public PaymentResponse getPaymentById(UUID paymentId) {
+    public PaymentResponse getPaymentById(UUID paymentId, String username, String role) {
 
-        return PaymentResponse.from(this.findPaymentById(paymentId));
+        Payment payment = findPaymentById(paymentId);
+
+        // customer는 본인 것만 조회 가능
+        if (role.equals(UserRole.CUSTOMER.getAuthority()) && !payment.getUsername().equals(username)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        return PaymentResponse.from(payment);
     }
 
     @Transactional
