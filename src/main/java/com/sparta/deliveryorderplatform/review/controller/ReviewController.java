@@ -1,12 +1,17 @@
 package com.sparta.deliveryorderplatform.review.controller;
 
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
+import com.sparta.deliveryorderplatform.global.common.PageResponse;
 import com.sparta.deliveryorderplatform.review.dto.request.CreateReviewRequest;
+import com.sparta.deliveryorderplatform.review.dto.request.SearchReviewCondition;
 import com.sparta.deliveryorderplatform.review.dto.request.UpdateReviewRequest;
 import com.sparta.deliveryorderplatform.review.dto.response.ReviewResponse;
 import com.sparta.deliveryorderplatform.review.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +39,19 @@ public class ReviewController {
         ReviewResponse response = reviewService.createReview(orderId, "tmp", request);
 
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    /**
+     * 리뷰 목록 조회 api
+     * @return
+     */
+    @GetMapping("/reviews")
+    public ResponseEntity<?> getReviewList(@ModelAttribute SearchReviewCondition request,
+                                           @PageableDefault(size = 10, page = 0) Pageable pageable) {
+
+        Page<ReviewResponse> response = reviewService.getReviewList(request, pageable);
+
+        return ResponseEntity.ok(PageResponse.of(response));
     }
 
     /**

@@ -3,11 +3,16 @@ package com.sparta.deliveryorderplatform.review.service;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import com.sparta.deliveryorderplatform.review.dto.request.CreateReviewRequest;
+import com.sparta.deliveryorderplatform.review.dto.request.SearchReviewCondition;
 import com.sparta.deliveryorderplatform.review.dto.request.UpdateReviewRequest;
 import com.sparta.deliveryorderplatform.review.dto.response.ReviewResponse;
 import com.sparta.deliveryorderplatform.review.entity.Review;
 import com.sparta.deliveryorderplatform.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +37,24 @@ public class ReviewService {
                 username, request.getRating(), request.getContent());
 
         return ReviewResponse.from(reviewRepository.save(review));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ReviewResponse> getReviewList(SearchReviewCondition request, Pageable pageable) {
+
+        int size = pageable.getPageSize();
+        if (size != 10 && size != 30 && size != 50)
+            size = 10;
+
+        Sort sort = pageable.getSort().isSorted() ?
+                pageable.getSort() : Sort.by(Sort.Direction.DESC, "createdAt");
+
+        Pageable validatedPageable = PageRequest.of(pageable.getPageNumber(), size,
+                sort);
+
+        Page<Review> reviews = reviewRepository.searchReviews(request, validatedPageable);
+
+        return reviews.map(ReviewResponse::from);
     }
 
     @Transactional(readOnly = true)
