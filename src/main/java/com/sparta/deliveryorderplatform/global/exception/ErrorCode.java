@@ -14,6 +14,9 @@ public enum ErrorCode {
 	INVALID_ROLE_SELECTION(400, "INVALID_ROLE_SELECTION", "가입할 수 없는 권한입니다."),
   	UNAUTHORIZED_ACCESS(403, "UNAUTHORIZED_ACCESS", "접근 권한이 없습니다."),
 
+	// menu
+	MENU_NOT_FOUND(404, "MENU_NOT_FOUND", "해당 상품이 존재하지 않습니다."),
+
 	// category
   	DUPLICATE_CATEGORY_NAME(400, "DUPLICATE_CATEGORY_NAME", "이미 존재하는 카테고리명입니다."),
   	CATEGORY_NOT_FOUND(404, "CATEGORY_NOT_FOUND", "존재하지 않거나 삭제된 카테고리입니다."),
