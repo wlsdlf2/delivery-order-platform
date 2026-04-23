@@ -96,10 +96,12 @@ public class PaymentController {
      * @param paymentId
      * @return
      */
+    @PreAuthorize("hasRole('MASTER')")
     @DeleteMapping("/payments/{paymentId}")
     public ResponseEntity<?> deletePayment(@PathVariable UUID paymentId) {
 
         paymentService.deletePayment(paymentId);
+
         return ResponseEntity.ok(ApiResponse.success());
     }
 }
