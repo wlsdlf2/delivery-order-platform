@@ -8,9 +8,11 @@ import com.sparta.deliveryorderplatform.payment.dto.response.PaymentResponse;
 import com.sparta.deliveryorderplatform.payment.entity.Payment;
 import com.sparta.deliveryorderplatform.payment.entity.PaymentMethod;
 import com.sparta.deliveryorderplatform.payment.repository.PaymentRepository;
+import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +43,7 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PaymentResponse> getPaymentList(int page, int size) {
+    public Page<PaymentResponse> getPaymentList(int page, int size, String username, String role) {
 
         if (size != 10 && size != 30 && size != 50) {
             size = 10;
@@ -49,7 +51,7 @@ public class PaymentService {
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        return paymentRepository.findAllByDeletedAtIsNull(pageRequest).map(PaymentResponse::from);
+        return paymentRepository.findPaymentList(username, role, pageRequest).map(PaymentResponse::from);
     }
 
     @Transactional(readOnly = true)

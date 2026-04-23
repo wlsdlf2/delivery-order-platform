@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,9 +46,13 @@ public class PaymentController {
      */
     @GetMapping("/payments")
     public ResponseEntity<?> getPaymentList(@RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(defaultValue = "10") int size) {
+                                            @RequestParam(defaultValue = "10") int size,
+                                            Authentication authentication) {
 
-        Page<PaymentResponse> response = paymentService.getPaymentList(page, size);
+        String username = (String) authentication.getPrincipal();
+        String role = authentication.getAuthorities().iterator().next().getAuthority();
+
+        Page<PaymentResponse> response = paymentService.getPaymentList(page, size, username, role);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
