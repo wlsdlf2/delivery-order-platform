@@ -34,15 +34,14 @@ public class OrderController {
     /**
      * 주문 상태 변경 : PENDING - > ACCEPTED
      * @param orderId
-     * @param req
      * @param auth
      * @return
      */
     @PatchMapping("/{orderId}/status")
     public ResponseEntity<ApiResponse<Void>> updateOrderStatus(
-        @PathVariable UUID orderId, @RequestBody OrderRequestDto req, Authentication auth) {
+        @PathVariable UUID orderId, @RequestBody String status , Authentication auth) {
         //주문 상태 변경 메서드 호출.
-        orderService.updateOrderStatus(orderId, req, auth);
+        orderService.updateOrderStatus(orderId, status, auth);
         return ResponseEntity.ok(ApiResponse.success());
     }
 

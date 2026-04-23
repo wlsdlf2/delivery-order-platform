@@ -65,14 +65,17 @@ public class Order extends BaseAuditEntity {
     @Lob
     private String request; // 주문 요청 사항
 
+    //주문 상태 변경.
+    public void statusUpdate(String status){
+        this.status = OrderStatus.valueOf(status);
+    }
+
     //주문 요청 사항 변경
     public void update(OrderRequestDto req, Store store, Address address) {
-        Order.builder()
-            .store(store)
-            .address(address)
-            .orderType(req.getOrderType())
-            .request(req.getRequest())
-            .build();
+        this.store = store;
+        this.address = address;
+        this.orderType = req.getOrderType();
+        this.request = req.getRequest();
     }
 
     // 주문 생성.

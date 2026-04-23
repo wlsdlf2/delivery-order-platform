@@ -6,8 +6,8 @@ import com.sparta.deliveryorderplatform.order.dto.OrderItemRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
 import com.sparta.deliveryorderplatform.order.entity.Order;
-import com.sparta.deliveryorderplatform.order.entity.OrderItem;
 import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
+import com.sparta.deliveryorderplatform.order.entity.OrderType;
 import com.sparta.deliveryorderplatform.order.practice.Address;
 import com.sparta.deliveryorderplatform.order.practice.AddressRepository;
 import com.sparta.deliveryorderplatform.order.practice.StoreRepository;
@@ -49,16 +49,36 @@ public class OrderService {
     /**
      *
      * @param orderId
-     * @param req
      * @param auth
      */
-    public void updateOrderStatus(UUID orderId, OrderRequestDto req, Authentication auth){
-        // 사용자 권한을 가져온다.
-        // 수정할 Order를 가져온다.
-        // 사용자 권한이 CUSTOMER인 경우 예외를 던진다.
-        // 사용자 권한이 OWNER인 경우, Order의 Status를 꺼낸 다음, 다음 상태로 변경한다.
-        // 사용자 권한이 MASTER인 경우,
+    @Transactional
+    public void updateOrderStatus(UUID orderId, String status, Authentication auth){
+        //사용자의 username을 가져온다.
+        String   username = (String) auth.getPrincipal();
 
+        //수정된 order를 가져온다.
+        Order updateOrder = orderRepository.findById(orderId).orElseThrow(()->new IllegalArgumentException("조회된 주문이 없음."));
+
+        //이 사용자가 수정 요청한 사용자인지 검사한다.
+        if(!username.equals(updateOrder.getUser().getUsername())) {
+            throw new AccessDeniedException("사용자가 아님");
+        }
+        // 사용자의 권한 목록 중 가장 첫번째를 가져온다.
+        String role = auth.getAuthorities().iterator().next().getAuthority();
+
+        // 고객이면, 예외 던진다.
+        if("ROLE_CUSTOMER".equals(role)) {
+            throw new AccessDeniedException("권한없음");
+        }
+        // 가게 주인이라면
+        if("ROLE_OWNER".equals(role)){
+            //현재 OrderStatus를 다음 단계로 변경하고, 문자열로 변환하여 저장한다.
+            status = updateOrder.getStatus().getNextStatus().name();
+        }
+        //그 외 마스터의 경우는 status를 사용하도록 한다.
+
+        //Status만 변경하는 인스턴스 메서드를 호출하여 DB에 적용시킨다.
+        updateOrder.statusUpdate(status);
     }
 
     /**
@@ -77,7 +97,7 @@ public class OrderService {
 
         //이 사용자가 수정 요청한 사용자인지 판단.
         if(!username.equals(updateOrder.getUser().getUsername())) {
-            return;
+            throw new AccessDeniedException("사용자가 아님");
         }
 
         // 사용자의 인증 객체에서 권한 목록을 추출
@@ -100,7 +120,7 @@ public class OrderService {
 
         //그 외의 경우는 요청 수정 권한이 없으므로 예외 던짐.
         if(!isAllowed) {
-            throw new AccessDeniedException("수정 권한이 없습니다.");
+            throw new AccessDeniedException("권한 없음");
         }
         //가게 조회
         Store store =  storeRepository.findById(orderReq.getStoreId()).orElseThrow(() ->new IllegalArgumentException("가게가 없음."));
