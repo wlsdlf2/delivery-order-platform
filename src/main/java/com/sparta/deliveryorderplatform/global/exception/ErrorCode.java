@@ -11,6 +11,9 @@ public enum ErrorCode {
 	VALIDATION_ERROR(400, "VALIDATION_ERROR", "요청 값이 올바르지 않습니다."),
 	INVALID_PASSWORD(400, "INVALID_PASSWORD", "비밀번호가 올바르지 않습니다."),
 
+	// menu
+	MENU_NOT_FOUND(404, "MENU_NOT_FOUND", "해당 상품이 존재하지 않습니다."),
+  
   UNAUTHORIZED_ACCESS(403, "UNAUTHORIZED_ACCESS", "접근 권한이 없습니다."),
 
   DUPLICATE_CATEGORY_NAME(400, "DUPLICATE_CATEGORY_NAME", "이미 존재하는 카테고리명입니다."),
