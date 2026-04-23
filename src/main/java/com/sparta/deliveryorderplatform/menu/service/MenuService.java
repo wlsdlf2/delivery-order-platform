@@ -32,8 +32,8 @@ public class MenuService {
     public Page<MenuResponseDto> getMenuList(UUID storeId, int page, int size, String user) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         if (user.equals("user"))
-            return menuRepository.findByStore_StoreIdAndDeletedAtIsNullAndIsHiddenFalse(storeId, pageRequest).map(MenuResponseDto::new);
-        return menuRepository.findByStore_StoreIdAndDeletedAtIsNull(storeId, pageRequest).map(MenuResponseDto::new);
+            return menuRepository.findByStore_idAndDeletedAtIsNullAndIsHiddenFalse(storeId, pageRequest).map(MenuResponseDto::new);
+        return menuRepository.findByStore_idAndDeletedAtIsNull(storeId, pageRequest).map(MenuResponseDto::new);
     }
 
     @Transactional

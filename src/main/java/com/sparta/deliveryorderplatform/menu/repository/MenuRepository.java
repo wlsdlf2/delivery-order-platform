@@ -11,9 +11,9 @@ import java.util.UUID;
 public interface MenuRepository extends JpaRepository<Menu, UUID> {
     Optional<Menu> findByMenuIdAndDeletedAtIsNullAndIsHiddenFalse(UUID menuId);
 
-    Page<Menu> findByStore_StoreIdAndDeletedAtIsNullAndIsHiddenFalse(UUID storeId, Pageable pageable);
+    Page<Menu> findByStore_idAndDeletedAtIsNullAndIsHiddenFalse(UUID storeId, Pageable pageable);
 
-    Page<Menu> findByStore_StoreIdAndDeletedAtIsNull(UUID storeId, Pageable pageRequest);
+    Page<Menu> findByStore_idAndDeletedAtIsNull(UUID storeId, Pageable pageRequest);
 
     Optional<Menu> findByMenuIdAndDeletedAtIsNull(UUID menuId);
 
