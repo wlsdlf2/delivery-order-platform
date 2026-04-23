@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -64,6 +65,13 @@ public class OrderItem  {
             .menu(menu)
             .quantity(quantity)
             .unitPrice(unitPrice)
+            .build();
+    }
+    public void update(OrderItem item){
+        OrderItem.builder()
+            .menu(item.getMenu())
+            .quantity(item.getQuantity())
+            .unitPrice(item.getUnitPrice())
             .build();
     }
 }

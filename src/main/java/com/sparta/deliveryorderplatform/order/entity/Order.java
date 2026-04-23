@@ -3,7 +3,7 @@ package com.sparta.deliveryorderplatform.order.entity;
 import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
 import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
 import com.sparta.deliveryorderplatform.order.practice.Address;
-import com.sparta.deliveryorderplatform.order.practice.Store;
+import com.sparta.deliveryorderplatform.store.entity.Store;
 import com.sparta.deliveryorderplatform.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -65,16 +65,18 @@ public class Order extends BaseAuditEntity {
     @Lob
     private String request; // 주문 요청 사항
 
-    //주문 상태 및 요청 사항 수정.
-    public static void update(OrderRequestDto req){
+    //주문 요청 사항 변경
+    public void update(OrderRequestDto req, Store store, Address address) {
         Order.builder()
+            .store(store)
+            .address(address)
             .orderType(req.getOrderType())
             .request(req.getRequest())
             .build();
     }
 
     // 주문 생성.
-    public static Order createOrder(User user, Store store,  Address address, OrderType orderType,Integer totalPrice, String request) {
+    public static Order createOrder(User user, com.sparta.deliveryorderplatform.store.entity.Store store,  Address address, OrderType orderType,Integer totalPrice, String request) {
         return Order.builder()
                     .user(user)
                     .store(store)

@@ -30,23 +30,29 @@ public class OrderItemService {
     /**
      * 주문 생성 시, 주문 메뉴 추가.
      * @param orderRequestDto : 주문 메뉴 객체
-     * @param username        : 사용자 식별자.
      */
     @Transactional
-    public void createOrderitem(OrderRequestDto orderRequestDto, String username, UUID orderId) {
-        List<OrderItemRequestDto> items = orderRequestDto.getItems(); // 주문 요청 객체에서 주문 메뉴 리스트를 추출.
+    public void createOrderitem(OrderRequestDto orderRequestDto, UUID orderId) {
+        // 주문 요청 객체에서 주문 메뉴 리스트를 추출.
+        List<OrderItemRequestDto> items = orderRequestDto.getItems();
 
-        List<OrderItem> orderItems = new ArrayList<>();               // DB에 저장 시킬 주문 메뉴 리스트 선언.
-        Order ordered = orderRepository.findById(orderId)
-                                       .orElseThrow(()-> new IllegalArgumentException("주문이 없습니다.")); //새롭게 생성한 Order를 가져온다.
+        //새롭게 생성한 Order를 가져옴.
+        Order ordered = orderRepository.findById(orderId).orElseThrow(()-> new IllegalArgumentException("주문이 없습니다."));
+
+        // DB에 저장 시킬 주문 메뉴 리스트 선언.
+        List<OrderItem> orderItems = new ArrayList<>();
+
         //주문 메뉴 만들기.
-        for (OrderItemRequestDto item : items) { // 주문메뉴 리스트를 반복하여,
-            Menu orderedMenu = menuRepository.findById(item.getMenuId())
-                                             .orElseThrow(() -> new IllegalAccessError("주소가 없습니다.")); // 주문 메뉴 안의 menuId로 Menu를 가져온다.
-            orderItems.add(OrderItem.createOrderItem(ordered, orderedMenu, item.getQuantity(), orderedMenu.getPrice())); //
+        for (OrderItemRequestDto item : items) { // 주문메뉴 리스트를 반복,
+            // 주문 메뉴 안의 menuId로 Menu를 가져옴.
+            Menu orderedMenu = menuRepository.findById(item.getMenuId()).orElseThrow(() -> new IllegalAccessError("주소가 없습니다."));
+            //주문 메뉴들을 하나씩 만들어, 리스트에 저장.
+            orderItems.add(OrderItem.createOrderItem(ordered, orderedMenu, item.getQuantity(), orderedMenu.getPrice()));
         }
 
+        // DB에 저장 시킬 주문 메뉴 리스트 선언.
         orderItemRepository.saveAll(orderItems); // 이 리스트를 모두 DB에 저장.
     }
+
 
 }

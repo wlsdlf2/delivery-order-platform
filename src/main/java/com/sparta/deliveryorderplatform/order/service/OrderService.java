@@ -6,12 +6,13 @@ import com.sparta.deliveryorderplatform.order.dto.OrderItemRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
 import com.sparta.deliveryorderplatform.order.entity.Order;
+import com.sparta.deliveryorderplatform.order.entity.OrderItem;
 import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
 import com.sparta.deliveryorderplatform.order.practice.Address;
 import com.sparta.deliveryorderplatform.order.practice.AddressRepository;
-import com.sparta.deliveryorderplatform.order.practice.Store;
 import com.sparta.deliveryorderplatform.order.practice.StoreRepository;
 import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
+import com.sparta.deliveryorderplatform.store.entity.Store;
 import com.sparta.deliveryorderplatform.user.entity.User;
 import com.sparta.deliveryorderplatform.user.repository.UserRepository;
 import java.util.List;
@@ -42,6 +43,24 @@ public class OrderService {
     @Autowired
     private MenuRepository menuRepository;
 
+    @Autowired
+    private OrderItemService orderItemService;
+
+    /**
+     *
+     * @param orderId
+     * @param req
+     * @param auth
+     */
+    public void updateOrderStatus(UUID orderId, OrderRequestDto req, Authentication auth){
+        // 사용자 권한을 가져온다.
+        // 수정할 Order를 가져온다.
+        // 사용자 권한이 CUSTOMER인 경우 예외를 던진다.
+        // 사용자 권한이 OWNER인 경우, Order의 Status를 꺼낸 다음, 다음 상태로 변경한다.
+        // 사용자 권한이 MASTER인 경우,
+
+    }
+
     /**
      * 주문 요청 사항 변경
      * @param orderId  주문 식별자
@@ -49,31 +68,47 @@ public class OrderService {
      * @param auth   로그인한 사용자 정보
      * @return  주문 응답객체
      */
+    @Transactional
     public void updateOrderRequest(UUID orderId, OrderRequestDto orderReq, Authentication auth) {
         // 사용자 식별자 추출.
         String  username = (String) auth.getPrincipal();
         // 수정할 Order를 조회
-        Order updateOrder = orderRepository.findById(orderId)
-                                           .orElseThrow(()-> new IllegalAccessError("수정할 주문이 없습니다."));
-        boolean isAllowed = auth.getAuthorities().stream()          //인증 객체에서 사용자의 권한 목록을 추출하고,
+        Order updateOrder = orderRepository.findById(orderId).orElseThrow(()-> new IllegalAccessError("수정할 주문이 없습니다."));
+
+        //이 사용자가 수정 요청한 사용자인지 판단.
+        if(!username.equals(updateOrder.getUser().getUsername())) {
+            return;
+        }
+
+        // 사용자의 인증 객체에서 권한 목록을 추출
+        boolean isAllowed = auth.getAuthorities().stream()
+            //권한 목록 중에서, 조건 검사를 수행 : True/False
             .anyMatch(grantedAuthority -> {
-                String role =  grantedAuthority.getAuthority();     //권한을 추출해서
-                if (role.equals("ROLE_MASTER")) {                   //마스터이면 요청 수정 가능
+                //어떤 권한인지 문자열로 추출.
+                String role =  grantedAuthority.getAuthority();
+                //권한이 마스터라면 그냥 true 반환.
+                if (role.equals("ROLE_MASTER")) {
                     return true;
                 }
-                                //고객이면서 주문 상태가 PENDING일 때에만 주문 요청 수정 가능
+                //권한이 고객이고, 주문 상태가 PENDING 이라면 true 반환
                 if (role.equals("ROLE_CUSTOMER") && updateOrder.getStatus() == OrderStatus.PENDING) {
                     return true;
                 }
-                // 그 외의 경우 종료.
+                // 그 외는 false
                 return false;
             });
 
-        if(!isAllowed) { // 해당 조건에 맞지 않으면, 예외를 던진다.
+        //그 외의 경우는 요청 수정 권한이 없으므로 예외 던짐.
+        if(!isAllowed) {
             throw new AccessDeniedException("수정 권한이 없습니다.");
         }
-        // 데이터 업데이트 (전체 필드 반영)
-        updateOrder.update(orderReq);
+        //가게 조회
+        Store store =  storeRepository.findById(orderReq.getStoreId()).orElseThrow(() ->new IllegalArgumentException("가게가 없음."));
+        // 주소 조회
+        Address address = addressRepository.findById(orderReq.getAddressId()).orElseThrow(() ->new IllegalArgumentException("주소가 없음."));
+        // Order 데이터 업데이트 (전체 필드 반영)
+        updateOrder.update(orderReq,store,address);
+
     }
 
 
