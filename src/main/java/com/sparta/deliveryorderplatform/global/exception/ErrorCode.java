@@ -28,7 +28,7 @@ public enum ErrorCode {
 	INVALID_PAYMENT_STATUS(400, "INVALID_PAYMENT_STATUS", "유효하지 않은 결제 상태 변경입니다."),
 
 	// review
-	REVIEW_NOT_FOUND(404, "REVIEW_NOT_FOUND", "리뷰를 찾을 수 없습니다."),
+	REVIEW_NOT_FOUND(404, "REVIEW_NOT_FOUND", "리뷰를 찾을 수 없습니다.");
 	private final int status;
 	private final String code;
 	private final String message;
