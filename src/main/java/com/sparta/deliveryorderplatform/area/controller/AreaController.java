@@ -6,13 +6,14 @@ import com.sparta.deliveryorderplatform.area.dto.AreaSearchDTO;
 import com.sparta.deliveryorderplatform.area.service.AreaService;
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
 import com.sparta.deliveryorderplatform.global.common.PageResponse;
+import com.sparta.deliveryorderplatform.user.entity.UserRole;
+import com.sparta.deliveryorderplatform.user.security.UserDetailsImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,7 +26,7 @@ public class AreaController {
 
     // create
     @PostMapping
-    @PreAuthorize("hasAuthority('MASTER')")
+    @PreAuthorize("hasAnyRole('MASTER')")
     public ResponseEntity<ApiResponse<AreaResponseDTO>> createArea(@Valid @RequestBody AreaRequestDTO requestDTO) {
         return ResponseEntity.ok(ApiResponse.success(areaService.createArea(requestDTO)));
     }
@@ -34,13 +35,10 @@ public class AreaController {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<AreaResponseDTO>>> getAreas(
         AreaSearchDTO searchDTO,
-        Authentication authentication,
+        @AuthenticationPrincipal UserDetailsImpl userDetails,
         Pageable pageable
     ) {
-        String role = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .findFirst()
-                .orElse("ROLE_USER");
+        UserRole role = userDetails.getUser().getRole();
         return ResponseEntity.ok(ApiResponse.success(PageResponse.of(areaService.getAreas(searchDTO, role, pageable))));
     }
 
@@ -52,7 +50,7 @@ public class AreaController {
 
     // update
     @PutMapping("/{areaId}")
-    @PreAuthorize("hasAuthority('MASTER')")
+    @PreAuthorize("hasAnyRole('MASTER')")
     public ResponseEntity<ApiResponse<AreaResponseDTO>> updateArea(
         @PathVariable UUID areaId,
         @Valid @RequestBody AreaRequestDTO requestDTO
@@ -62,11 +60,11 @@ public class AreaController {
 
     // delete
     @PatchMapping("/{areaId}")
-    @PreAuthorize("hasAuthority('MASTER')")
+    @PreAuthorize("hasAnyRole('MASTER')")
     public ResponseEntity<ApiResponse<AreaResponseDTO>> deleteArea(
-        @PathVariable UUID areaId, Authentication authentication
+        @PathVariable UUID areaId,
+        @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String username = authentication.getName(); // principal에 담긴 username 반환
-        return ResponseEntity.ok(ApiResponse.success(areaService.deleteArea(areaId, username)));
+        return ResponseEntity.ok(ApiResponse.success(areaService.deleteArea(areaId, userDetails.getUser())));
     }
 }

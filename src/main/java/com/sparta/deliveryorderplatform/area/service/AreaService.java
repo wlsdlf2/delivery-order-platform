@@ -7,6 +7,7 @@ import com.sparta.deliveryorderplatform.area.entity.Area;
 import com.sparta.deliveryorderplatform.area.repository.AreaRepository;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,10 +34,10 @@ public class AreaService {
 
     // get 목록 조회
     @Transactional(readOnly = true)
-    public Page<AreaResponseDTO> getAreas(AreaSearchDTO searchDTO, String role, Pageable pageable) {
+    public Page<AreaResponseDTO> getAreas(AreaSearchDTO searchDTO, UserRole role, Pageable pageable) {
         // 관리자 여부 판단
-        boolean isAdmin = "MASTER".equals(role);
-        searchDTO.setIsAdmin(isAdmin);
+        boolean isAdmin = role == UserRole.MASTER;
+        if (!isAdmin) searchDTO.setIsActive(true);  // 관리자가 아니라면 항상 활성 지역만 보도록 강제함
 
         return areaRepository.searchAreas(searchDTO, pageable).map(AreaResponseDTO::from);
     }
