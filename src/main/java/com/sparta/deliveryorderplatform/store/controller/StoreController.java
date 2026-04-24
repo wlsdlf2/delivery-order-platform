@@ -43,12 +43,12 @@ public class StoreController {
             Pageable pageable,
             Authentication authentication
     ) {
-        if (authentication != null) {
-            searchDTO.setUsername(authentication.getName());
-            searchDTO.setRole(authentication.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .findFirst().orElse(null));
-        }
+        // 1. 인증 정보에서 필요한 값만 추출하여 DTO에 세팅
+        searchDTO.setUsername(authentication.getName());
+        searchDTO.setRole(authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst().orElse(null));
+
         return ResponseEntity.ok(ApiResponse.success(PageResponse.of(storeService.getStores(searchDTO, pageable))));
     }
 
