@@ -116,9 +116,23 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("사용자 상세 조회 실패 - CUSTOMER 권한으로 요청 시 403을 반환한다")
-	void getUser_customer_returns403() throws Exception {
+	@DisplayName("사용자 상세 조회 성공 - CUSTOMER가 본인을 조회하면 200을 반환한다")
+	void getUser_customer_self_returns200() throws Exception {
+		given(userService.getUser(any(), any())).willReturn(sampleResponse());
+
 		mockMvc.perform(get("/api/v1/users/user1234")
+				.with(authentication(customerAuth())))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.username").value("user1234"));
+	}
+
+	@Test
+	@DisplayName("사용자 상세 조회 실패 - CUSTOMER가 타인을 조회하면 403을 반환한다")
+	void getUser_customer_other_returns403() throws Exception {
+		given(userService.getUser(any(), any()))
+			.willThrow(new CustomException(ErrorCode.ACCESS_DENIED));
+
+		mockMvc.perform(get("/api/v1/users/other999")
 				.with(authentication(customerAuth())))
 			.andExpect(status().isForbidden());
 	}
