@@ -13,7 +13,6 @@ import com.sparta.deliveryorderplatform.store.entity.Store;
 import com.sparta.deliveryorderplatform.store.repository.StoreRepository;
 import com.sparta.deliveryorderplatform.user.entity.User;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
-import com.sparta.deliveryorderplatform.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,23 +28,19 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final CategoryService categoryService;
     private final AreaService areaService;
-    private final UserRepository userRepository;
 
     @Transactional
-    public StoreResponseDTO createStore(StoreRequestDTO requestDTO, String username) {
+    public StoreResponseDTO createStore(StoreRequestDTO requestDTO, User user) {
         // Category 삭제 여부 확인
         Category category = categoryService.findCategoryById(requestDTO.getCategoryId());
         // Area 활성화여부 확인
         Area area = areaService.findActiveAreaById(requestDTO.getAreaId());
 
-        User owner = userRepository.findById(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_ACCESS));
-
         Store store = Store.create(
                 requestDTO.getName(),
                 requestDTO.getAddress(),
                 requestDTO.getPhone(),
-                owner,
+                user,
                 category,
                 area
         );
@@ -59,17 +54,17 @@ public class StoreService {
     }
 
     @Transactional(readOnly = true)
-    public StoreResponseDTO getStoreById(UUID storeId, String username, String role) {
+    public StoreResponseDTO getStoreById(UUID storeId, User user) {
         Store store = findStoreById(storeId);
 
         // 1. MASTER는 삭제되지 않은 모든 가게 조회 가능
-        if (UserRole.MASTER.getAuthority().equals(role)) {
+        if (user.getRole() == UserRole.MASTER) {
             return StoreResponseDTO.from(store);
         }
 
         // 2. OWNER: 본인 가게만 조회 가능
-        if (UserRole.OWNER.getAuthority().equals(role)) {
-            if (store.getOwner().getUsername().equals(username)) {
+        if (user.getRole() == UserRole.OWNER) {
+            if (store.getOwner().getUsername().equals(user.getUsername())) {
                 return StoreResponseDTO.from(store);
             }
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
@@ -84,10 +79,8 @@ public class StoreService {
     }
 
     @Transactional
-    public StoreResponseDTO updateStore(UUID storeId, StoreRequestDTO requestDTO, String username) {
+    public StoreResponseDTO updateStore(UUID storeId, StoreRequestDTO requestDTO, User user) {
         Store store = findStoreById(storeId);
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_ACCESS));
 
         validateStoreAccess(user, store);
         
@@ -106,28 +99,27 @@ public class StoreService {
         return StoreResponseDTO.from(store);
     }
 
-    @Transactional
     // todo 완료되지 않은 주문 건이 있는지 확인하는 로직 추가 필요
-    public StoreResponseDTO updateVisibility(UUID storeId, Boolean isHidden, String username) {
+    // todo 해당 가게에 등록된 메뉴 전체 숨김(isHidden true) 처리해야할지 ?
+    @Transactional
+    public StoreResponseDTO updateVisibility(UUID storeId, Boolean isHidden, User user) {
         Store store = findStoreById(storeId);
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_ACCESS));
 
         validateStoreAccess(user, store);
-        
+
         store.updateVisibility(isHidden);
         return StoreResponseDTO.from(store);
     }
 
+    // todo 완료되지 않은 주문 건이 있는지 확인하는 로직 추가 필요
+    // todo 해당 가게에 등록된 메뉴 전체 숨김+삭제 처리해야할지 ?
     @Transactional
-    public StoreResponseDTO deleteStore(UUID storeId, String username) {
+    public StoreResponseDTO deleteStore(UUID storeId, User user) {
         Store store = findStoreById(storeId);
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_ACCESS));
 
         validateStoreAccess(user, store);
 
-        store.delete(username);
+        store.delete(user.getUsername());
         return StoreResponseDTO.from(store);
     }
 

@@ -7,13 +7,13 @@ import com.sparta.deliveryorderplatform.store.dto.StoreResponseDTO;
 import com.sparta.deliveryorderplatform.store.dto.StoreSearchDTO;
 import com.sparta.deliveryorderplatform.store.dto.StoreVisibilityRequestDTO;
 import com.sparta.deliveryorderplatform.store.service.StoreService;
+import com.sparta.deliveryorderplatform.user.security.UserDetailsImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -27,13 +27,12 @@ public class StoreController {
 
     // create (OWNER)
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('OWNER')")
+    @PreAuthorize("hasAnyRole('OWNER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> createStore(
             @Valid @RequestBody StoreRequestDTO requestDTO,
-            Authentication authentication
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String username = authentication.getName();
-        return ResponseEntity.ok(ApiResponse.success(storeService.createStore(requestDTO, username)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.createStore(requestDTO, userDetails.getUser())));
     }
 
     // get 목록 조회
@@ -41,13 +40,11 @@ public class StoreController {
     public ResponseEntity<ApiResponse<PageResponse<StoreResponseDTO>>> getStores(
             StoreSearchDTO searchDTO,
             Pageable pageable,
-            Authentication authentication
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         // 1. 인증 정보에서 필요한 값만 추출하여 DTO에 세팅
-        searchDTO.setUsername(authentication.getName());
-        searchDTO.setRole(authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .findFirst().orElse(null));
+        searchDTO.setUsername(userDetails.getUsername());
+        searchDTO.setRole(userDetails.getUser().getRole());
 
         return ResponseEntity.ok(ApiResponse.success(PageResponse.of(storeService.getStores(searchDTO, pageable))));
     }
@@ -56,48 +53,40 @@ public class StoreController {
     @GetMapping("/{storeId}")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> getStoreById(
             @PathVariable UUID storeId,
-            Authentication authentication
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String username = (authentication != null) ? authentication.getName() : null;
-        String role = (authentication != null) ? authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .findFirst().orElse(null) : null;
-
-        return ResponseEntity.ok(ApiResponse.success(storeService.getStoreById(storeId, username, role)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.getStoreById(storeId, userDetails.getUser())));
     }
 
     // update (OWNER, MASTER 권한)
     @PutMapping("/{storeId}")
-    @PreAuthorize("hasAnyAuthority('OWNER', 'MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> updateStore(
             @PathVariable UUID storeId,
             @Valid @RequestBody StoreRequestDTO requestDTO,
-            Authentication authentication
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String username = authentication.getName();
-        return ResponseEntity.ok(ApiResponse.success(storeService.updateStore(storeId, requestDTO, username)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.updateStore(storeId, requestDTO, userDetails.getUser())));
     }
 
     // hide 가게 숨김 여부 수정 (PATCH)
     @PatchMapping("/{storeId}/hide")
-    @PreAuthorize("hasAnyAuthority('OWNER', 'MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> updateStoreVisibility(
             @PathVariable UUID storeId,
             @Valid @RequestBody StoreVisibilityRequestDTO requestDTO,
-            Authentication authentication
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String username = authentication.getName();
-        return ResponseEntity.ok(ApiResponse.success(storeService.updateVisibility(storeId, requestDTO.getIsHidden(), username)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.updateVisibility(storeId, requestDTO.getIsHidden(), userDetails.getUser())));
     }
 
     // delete
     @PatchMapping("/{storeId}")
-    @PreAuthorize("hasAnyAuthority('OWNER', 'MASTER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> deleteStore(
             @PathVariable UUID storeId,
-            Authentication authentication
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String username = authentication.getName();
-        return ResponseEntity.ok(ApiResponse.success(storeService.deleteStore(storeId, username)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.deleteStore(storeId, userDetails.getUser())));
     }
 }

@@ -1,5 +1,6 @@
 package com.sparta.deliveryorderplatform.store.dto;
 
+import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,6 @@ public class StoreSearchDTO {
     private UUID areaId;       // 지역 필터
 
     // 서비스 레이어에서 권한별 필터링을 위해 사용할 필드
-    private String role;
+    private UserRole role;
     private String username;
 }
