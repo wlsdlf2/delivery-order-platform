@@ -53,8 +53,16 @@ public class StoreController {
 
     // get 상세 조회
     @GetMapping("/api/v1/stores/{storeId}")
-    public ResponseEntity<ApiResponse<StoreResponseDTO>> getStoreById(@PathVariable UUID storeId) {
-        return ResponseEntity.ok(ApiResponse.success(storeService.getStoreById(storeId)));
+    public ResponseEntity<ApiResponse<StoreResponseDTO>> getStoreById(
+            @PathVariable UUID storeId,
+            Authentication authentication
+    ) {
+        String username = (authentication != null) ? authentication.getName() : null;
+        String role = (authentication != null) ? authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst().orElse(null) : null;
+
+        return ResponseEntity.ok(ApiResponse.success(storeService.getStoreById(storeId, username, role)));
     }
 
     // update (OWNER, MASTER 권한)

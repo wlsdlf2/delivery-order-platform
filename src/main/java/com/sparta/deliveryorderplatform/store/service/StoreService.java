@@ -54,14 +54,33 @@ public class StoreService {
     }
 
     @Transactional(readOnly = true)
-    public StoreResponseDTO getStoreById(UUID storeId) {
-        Store store = findStoreById(storeId);
-        return StoreResponseDTO.from(store);
+    public Page<StoreResponseDTO> getStores(StoreSearchDTO searchDTO, Pageable pageable) {
+        return storeRepository.searchStores(searchDTO, pageable).map(StoreResponseDTO::from);
     }
 
     @Transactional(readOnly = true)
-    public Page<StoreResponseDTO> getStores(StoreSearchDTO searchDTO, Pageable pageable) {
-        return storeRepository.searchStores(searchDTO, pageable).map(StoreResponseDTO::from);
+    public StoreResponseDTO getStoreById(UUID storeId, String username, String role) {
+        Store store = findStoreById(storeId);
+
+        // MASTER -> 삭제되지 않은 모든 가게 조회 가능 (이미 findStoreById에서 삭제 여부 체크됨)
+        if (UserRole.MASTER.getAuthority().equals(role)) {
+            return StoreResponseDTO.from(store);
+        }
+
+        // OWNER -> 본인 가게만 조회 가능
+        if (UserRole.OWNER.getAuthority().equals(role)) {
+            if (!store.getOwner().getUsername().equals(username)) {
+                throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+            }
+            return StoreResponseDTO.from(store);
+        }
+
+        // CUSTOMER(권한 없는 경우) -> 숨김 처리된 가게는 조회 불가
+        if (Boolean.TRUE.equals(store.getIsHidden())) {
+            throw new CustomException(ErrorCode.STORE_NOT_FOUND);
+        }
+
+        return StoreResponseDTO.from(store);
     }
 
     @Transactional
