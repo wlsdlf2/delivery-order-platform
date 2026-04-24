@@ -46,7 +46,6 @@ public class UserController {
 
 	// 사용자 상세 조회
 	@GetMapping("/{username}")
-	@PreAuthorize("hasAnyRole('MASTER')")
 	public ResponseEntity<ApiResponse<UserResponseDto>> getUser(
 		@PathVariable String username,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
