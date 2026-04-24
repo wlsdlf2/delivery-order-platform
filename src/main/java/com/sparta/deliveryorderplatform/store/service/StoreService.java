@@ -62,20 +62,20 @@ public class StoreService {
     public StoreResponseDTO getStoreById(UUID storeId, String username, String role) {
         Store store = findStoreById(storeId);
 
-        // MASTER -> 삭제되지 않은 모든 가게 조회 가능 (이미 findStoreById에서 삭제 여부 체크됨)
+        // 1. MASTER는 삭제되지 않은 모든 가게 조회 가능
         if (UserRole.MASTER.getAuthority().equals(role)) {
             return StoreResponseDTO.from(store);
         }
 
-        // OWNER -> 본인 가게만 조회 가능
+        // 2. OWNER: 본인 가게만 조회 가능
         if (UserRole.OWNER.getAuthority().equals(role)) {
-            if (!store.getOwner().getUsername().equals(username)) {
-                throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+            if (store.getOwner().getUsername().equals(username)) {
+                return StoreResponseDTO.from(store);
             }
-            return StoreResponseDTO.from(store);
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
-        // CUSTOMER(권한 없는 경우) -> 숨김 처리된 가게는 조회 불가
+        // 3. 그 외(CUSTOMER 등): 숨김 처리된 가게는 조회 불가
         if (Boolean.TRUE.equals(store.getIsHidden())) {
             throw new CustomException(ErrorCode.STORE_NOT_FOUND);
         }
