@@ -45,14 +45,15 @@ public class Address extends BaseAuditEntity {
 	@Column(name = "zip_code")
 	private String zipCode;
 
-	@Column(name = "is_default")
-	private Boolean isDefault;
+	@Builder.Default
+	@Column(name = "is_default", nullable = false)
+	private boolean isDefault = false;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	public static Address createAddress(String alias, String address, String detail, String zipCode, Boolean isDefault, User user) {
+	public static Address createAddress(String alias, String address, String detail, String zipCode, boolean isDefault, User user) {
 		if (address == null || address.isBlank()) throw new CustomException(ErrorCode.VALIDATION_ERROR);
 		if (user == null) throw new CustomException(ErrorCode.USER_NOT_FOUND);
 
@@ -61,12 +62,12 @@ public class Address extends BaseAuditEntity {
 			.address(address)
 			.detail(detail)
 			.zipCode(zipCode)
-			.isDefault(isDefault != null && isDefault)
+			.isDefault(isDefault)
 			.user(user)
 			.build();
 	}
 
-	public void updateAddress(String alias, String address, String detail, String zipCode, Boolean isDefault) {
+	public void updateAddress(String alias, String address, String detail, String zipCode, boolean isDefault) {
 		if (address == null || address.isBlank()) throw new CustomException(ErrorCode.VALIDATION_ERROR);
 
 		this.alias = alias;
