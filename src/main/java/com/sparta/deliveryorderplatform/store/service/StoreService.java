@@ -8,6 +8,7 @@ import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import com.sparta.deliveryorderplatform.store.dto.StoreRequestDTO;
 import com.sparta.deliveryorderplatform.store.dto.StoreResponseDTO;
+import com.sparta.deliveryorderplatform.store.dto.StoreSearchDTO;
 import com.sparta.deliveryorderplatform.store.entity.Store;
 import com.sparta.deliveryorderplatform.store.repository.StoreRepository;
 import com.sparta.deliveryorderplatform.user.entity.User;
@@ -59,8 +60,8 @@ public class StoreService {
     }
 
     @Transactional(readOnly = true)
-    public Page<StoreResponseDTO> getStores(Pageable pageable) {
-        return storeRepository.findAll(pageable).map(StoreResponseDTO::from);
+    public Page<StoreResponseDTO> getStores(StoreSearchDTO searchDTO, Pageable pageable) {
+        return storeRepository.searchStores(searchDTO, pageable).map(StoreResponseDTO::from);
     }
 
     @Transactional
@@ -87,6 +88,7 @@ public class StoreService {
     }
 
     @Transactional
+    // todo 완료되지 않은 주문 건이 있는지 확인하는 로직 추가 필요
     public StoreResponseDTO updateVisibility(UUID storeId, Boolean isHidden, String username) {
         Store store = findStoreById(storeId);
         User user = userRepository.findById(username)
