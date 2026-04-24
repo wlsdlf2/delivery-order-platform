@@ -50,9 +50,11 @@ public class StoreController {
     @PreAuthorize("hasAnyAuthority('OWNER', 'MASTER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> updateStore(
             @PathVariable UUID storeId,
-            @Valid @RequestBody StoreRequestDTO requestDTO
+            @Valid @RequestBody StoreRequestDTO requestDTO,
+            Authentication authentication
     ) {
-        return ResponseEntity.ok(ApiResponse.success(storeService.updateStore(storeId, requestDTO)));
+        String username = authentication.getName();
+        return ResponseEntity.ok(ApiResponse.success(storeService.updateStore(storeId, requestDTO, username)));
     }
 
     // hide 가게 숨김 여부 수정 (PATCH)
@@ -60,9 +62,11 @@ public class StoreController {
     @PreAuthorize("hasAnyAuthority('OWNER', 'MASTER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> updateStoreVisibility(
             @PathVariable UUID storeId,
-            @Valid @RequestBody StoreVisibilityRequestDTO requestDTO
+            @Valid @RequestBody StoreVisibilityRequestDTO requestDTO,
+            Authentication authentication
     ) {
-        return ResponseEntity.ok(ApiResponse.success(storeService.updateVisibility(storeId, requestDTO.getIsHidden())));
+        String username = authentication.getName();
+        return ResponseEntity.ok(ApiResponse.success(storeService.updateVisibility(storeId, requestDTO.getIsHidden(), username)));
     }
 
     // delete

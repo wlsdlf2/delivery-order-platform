@@ -90,7 +90,8 @@ public class CategoryService {
     }
 
     // 헬퍼 메서드: 삭제되지 않은 데이터 조회
-    private Category findCategoryById(UUID categoryId) {
+    @Transactional(readOnly = true)
+    public Category findCategoryById(UUID categoryId) {
         return categoryRepository.findByIdAndDeletedAtIsNull(categoryId)
             .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
     }
