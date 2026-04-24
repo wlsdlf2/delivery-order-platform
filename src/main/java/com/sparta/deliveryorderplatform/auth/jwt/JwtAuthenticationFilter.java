@@ -1,11 +1,11 @@
 package com.sparta.deliveryorderplatform.auth.jwt;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtTokenProvider jwtTokenProvider;
+	private final UserDetailsService userDetailsService;
 
 	/*
 	 * 필터의 핵심 로직
@@ -41,17 +42,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (token != null) {
 			try {
 				if (jwtTokenProvider.validateToken(token)) {
-					// 토큰에서 사용자 아이디와 권한을 꺼낸다.
+					// 토큰에서 사용자 아이디를 꺼낸다.
 					String username = jwtTokenProvider.getUsername(token);
-					String role = jwtTokenProvider.getRole(token);
 
-					// 3. Spring Security가 인식할 수 있는 Authority 리스트를 만든다.
-					List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+					// 3. DB 조회를 통해 UserDetailsImpl 객체 생성
+					UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
 					// 4. 인증된 사용자 정보를 담은 인증 객체(Authentication)를 생성한다.
 					// (비밀번호는 이미 토큰으로 검증되었으므로 null로 둔다.)
 					UsernamePasswordAuthenticationToken auth =
-						new UsernamePasswordAuthenticationToken(username, null, authorities);
+						new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
 					// 5. SecurityContext에 이 인증 정보를 담아둔다.
 					// 이제 이후 로직에서 이 사용자가 누구인지 알 수 있게 된다.
