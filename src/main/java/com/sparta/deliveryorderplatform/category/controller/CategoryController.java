@@ -6,6 +6,7 @@ import com.sparta.deliveryorderplatform.category.dto.CategorySearchDTO;
 import com.sparta.deliveryorderplatform.category.service.CategoryService;
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
 import com.sparta.deliveryorderplatform.global.common.PageResponse;
+import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import com.sparta.deliveryorderplatform.user.security.UserDetailsImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,10 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<CategoryResponseDTO>>> getCategories(
         CategorySearchDTO searchDTO,
-        @RequestHeader("X-Role") String role,
+        @AuthenticationPrincipal UserDetailsImpl userDetails,
         Pageable pageable
     ) {
+        UserRole role = userDetails.getUser().getRole();
         return ResponseEntity.ok(ApiResponse.success(PageResponse.of(categoryService.getCategories(searchDTO, role, pageable))));
     }
 

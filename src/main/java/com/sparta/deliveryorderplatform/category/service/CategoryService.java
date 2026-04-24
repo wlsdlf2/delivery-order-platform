@@ -8,8 +8,7 @@ import com.sparta.deliveryorderplatform.category.repository.CategoryRepository;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import com.sparta.deliveryorderplatform.user.entity.User;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -37,19 +36,17 @@ public class CategoryService {
     }
 
     //read
-
     @Transactional(readOnly = true)
-    public Page<CategoryResponseDTO> getCategories(CategorySearchDTO searchDTO, String role, Pageable pageable) {
+    public Page<CategoryResponseDTO> getCategories(CategorySearchDTO searchDTO, UserRole role, Pageable pageable) {
         // 권한에 따라 검색 조건 결정 : 삭제된 데이터 조회 여부
-        boolean isAdmin = "MASTER".equals(role);
-        searchDTO.setIsAdmin(isAdmin);
+        boolean isAdmin = role == UserRole.MASTER;
 
         if (isAdmin) {
-            // 관리자 -> 페이징 처리
+            // 관리자 -> 삭제 데이터 호출 & 페이징 처리
             return categoryRepository.searchCategoriesForAdmin(searchDTO, pageable)
                     .map(CategoryResponseDTO::from);
         } else {
-            // 일반 사용자 -> 전체 목록
+            // 일반 사용자 -> 삭제되지 않은 전체 목록
             List<Category> categories = categoryRepository.searchCategoriesForUser(searchDTO);
             return new PageImpl<>(
                 categories.stream().map(CategoryResponseDTO::from).toList(),
@@ -58,6 +55,7 @@ public class CategoryService {
             );
         }
     }
+
     @Transactional(readOnly = true)
     public CategoryResponseDTO getCategoryById(UUID categoryId) {
         Category category = findCategoryById(categoryId);
@@ -86,8 +84,8 @@ public class CategoryService {
         category.delete(user.getUsername());
         return CategoryResponseDTO.from(category);
     }
-    // 헬퍼 메서드: 삭제되지 않은 데이터 조회
 
+    // 헬퍼 메서드: 삭제되지 않은 데이터 조회
     @Transactional(readOnly = true)
     public Category findCategoryById(UUID categoryId) {
         return categoryRepository.findByIdAndDeletedAtIsNull(categoryId)
