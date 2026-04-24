@@ -7,6 +7,9 @@ import com.sparta.deliveryorderplatform.category.entity.Category;
 import com.sparta.deliveryorderplatform.category.repository.CategoryRepository;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.user.entity.User;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,11 +27,9 @@ public class CategoryService {
 
     //Create
     @Transactional
-    public CategoryResponseDTO createCategory(CategoryRequestDTO requestDTO, String username, String role) {
+    public CategoryResponseDTO createCategory(CategoryRequestDTO requestDTO) {
         // 중복 체크
-        if (categoryRepository.existsByNameAndDeletedAtIsNull(requestDTO.getName())) {
-            throw new CustomException(ErrorCode.DUPLICATE_CATEGORY_NAME);
-        }
+        validateDuplicateName(requestDTO.getName());
 
         Category category = Category.create(requestDTO.getName());
         Category savedCategory = categoryRepository.save(category);
@@ -36,6 +37,7 @@ public class CategoryService {
     }
 
     //read
+
     @Transactional(readOnly = true)
     public Page<CategoryResponseDTO> getCategories(CategorySearchDTO searchDTO, String role, Pageable pageable) {
         // 권한에 따라 검색 조건 결정 : 삭제된 데이터 조회 여부
@@ -56,7 +58,6 @@ public class CategoryService {
             );
         }
     }
-
     @Transactional(readOnly = true)
     public CategoryResponseDTO getCategoryById(UUID categoryId) {
         Category category = findCategoryById(categoryId);
@@ -70,29 +71,33 @@ public class CategoryService {
 
         // 이름이 변경될 때만 중복 체크
         if (!category.getName().equals(requestDTO.getName())) {
-            if (categoryRepository.existsByNameAndDeletedAtIsNull(requestDTO.getName())) {
-                throw new CustomException(ErrorCode.DUPLICATE_CATEGORY_NAME);
-            }
+            validateDuplicateName(requestDTO.getName());
         }
 
         category.update(requestDTO.getName());
-
         return CategoryResponseDTO.from(category);
     }
 
     //delete
     @Transactional
-    public CategoryResponseDTO deleteCategory(UUID categoryId, String username) {
+    public CategoryResponseDTO deleteCategory(UUID categoryId, User user) {
         Category category = findCategoryById(categoryId);
-        category.delete(username);
 
+        category.delete(user.getUsername());
         return CategoryResponseDTO.from(category);
     }
-
     // 헬퍼 메서드: 삭제되지 않은 데이터 조회
+
     @Transactional(readOnly = true)
     public Category findCategoryById(UUID categoryId) {
         return categoryRepository.findByIdAndDeletedAtIsNull(categoryId)
             .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
+    }
+
+    // 카테고리명 중복 조회
+    private void validateDuplicateName(String name) {
+        if (categoryRepository.existsByNameAndDeletedAtIsNull(name)) {
+            throw new CustomException(ErrorCode.DUPLICATE_CATEGORY_NAME);
+        }
     }
 }
