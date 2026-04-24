@@ -39,8 +39,8 @@ public abstract class BaseAuditEntity {
 	@Column(length = 100)
 	private String deletedBy;
 
-	public void softDelete(String user) {
+	public void softDelete(String username) {
 		this.deletedAt = LocalDateTime.now();
-		this.deletedBy = user;
+		this.deletedBy = username;
 	}
 }
