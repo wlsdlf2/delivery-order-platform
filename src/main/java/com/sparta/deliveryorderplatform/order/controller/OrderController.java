@@ -46,11 +46,11 @@ public class OrderController {
     }
 
     /**
-     * 주문 사항 변경.
-     * @param orderId         주문 식별자
-     * @param orderRequestDto 주문 요청 객체
-     * @param authentication  로그인한 사용자 정보
-     * @return 주문 응답객체
+     * 주문 요청 사항 변경
+     * @param orderId  주문 식별자
+     * @param orderRequestDto 변경된 주문요청 데이터
+     * @param authentication   로그인한 사용자 정보
+     * @return  주문 응답객체
      */
     @PutMapping("/{orderId}")
     public ResponseEntity<ApiResponse<Void>> updateOrderRequest(
