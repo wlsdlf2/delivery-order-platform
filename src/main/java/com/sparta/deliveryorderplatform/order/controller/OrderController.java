@@ -31,6 +31,19 @@ public class OrderController {
     private OrderService orderService;
     @Autowired
     private OrderItemService orderItemService;
+    /**
+     * 주문 취소 요청 - CUSTOEMR, MASTER
+     * 주문 생성 후 5분이내에 할 것.
+     * @param orderId
+     * @param authentication
+     * @return
+     */
+    @PatchMapping("/{orderId}/cancle")
+    public ResponseEntity<ApiResponse<Void>> cancelOrder(@PathVariable UUID orderId, Authentication authentication) {
+        orderService.cancleOrder(orderId, authentication);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
 
     /**
      * 주문 삭제 - MASTER만
@@ -44,18 +57,7 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(dto));
     }
 
-    /**
-     * 주문 취소 요청 - CUSTOEMR, MASTER
-     * 주문 생성 후 5분이내에 할 것.
-     * @param orderId
-     * @param authentication
-     * @return
-     */
-    @PatchMapping("/{orderId}/cancle")
-    public ResponseEntity<ApiResponse<Void>> cancelOrder(@PathVariable UUID orderId, Authentication authentication) {
-        orderService.cancleOrder(orderId, authentication);
-        return ResponseEntity.ok(ApiResponse.success());
-    }
+
 
     /**
      * 주문 상태 변경 : PENDING - > ACCEPTED
