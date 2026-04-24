@@ -20,12 +20,13 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/stores")
 public class StoreController {
 
     private final StoreService storeService;
 
     // create (OWNER)
-    @PostMapping("/api/v1/stores")
+    @PostMapping
     @PreAuthorize("hasAnyAuthority('OWNER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> createStore(
             @Valid @RequestBody StoreRequestDTO requestDTO,
@@ -36,7 +37,7 @@ public class StoreController {
     }
 
     // get 목록 조회
-    @GetMapping("/api/v1/stores")
+    @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<StoreResponseDTO>>> getStores(
             StoreSearchDTO searchDTO,
             Pageable pageable,
@@ -52,7 +53,7 @@ public class StoreController {
     }
 
     // get 상세 조회
-    @GetMapping("/api/v1/stores/{storeId}")
+    @GetMapping("/{storeId}")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> getStoreById(
             @PathVariable UUID storeId,
             Authentication authentication
@@ -66,7 +67,7 @@ public class StoreController {
     }
 
     // update (OWNER, MASTER 권한)
-    @PutMapping("/api/v1/stores/{storeId}")
+    @PutMapping("/{storeId}")
     @PreAuthorize("hasAnyAuthority('OWNER', 'MASTER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> updateStore(
             @PathVariable UUID storeId,
@@ -78,7 +79,7 @@ public class StoreController {
     }
 
     // hide 가게 숨김 여부 수정 (PATCH)
-    @PatchMapping("/api/v1/stores/{storeId}/hide")
+    @PatchMapping("/{storeId}/hide")
     @PreAuthorize("hasAnyAuthority('OWNER', 'MASTER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> updateStoreVisibility(
             @PathVariable UUID storeId,
@@ -90,7 +91,7 @@ public class StoreController {
     }
 
     // delete
-    @PatchMapping("/api/v1/stores/{storeId}")
+    @PatchMapping("/{storeId}")
     @PreAuthorize("hasAnyAuthority('OWNER', 'MASTER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> deleteStore(
             @PathVariable UUID storeId,
