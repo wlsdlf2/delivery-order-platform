@@ -33,20 +33,27 @@ public class OrderController {
     private OrderItemService orderItemService;
 
     /**
-     * 주문 취소 요청
+     * 주문 삭제 - MASTER만
      * @param orderId 취소할 주문
      * @param authentication 사용자 인증 객체
      * @return 취소된 주문
      */
     @DeleteMapping("/{orderId}")
     public ResponseEntity<ApiResponse<OrderResponseDto>> deleteOrder(@PathVariable UUID orderId, Authentication authentication) {
-        OrderResponseDto dto = orderService.deleteOrder();
+        OrderResponseDto dto = orderService.deleteOrder(orderId, authentication);
         return ResponseEntity.ok(ApiResponse.success(dto));
     }
 
-    // 주문 취소 요청
+    /**
+     * 주문 취소 요청 - CUSTOEMR, MASTER
+     * 주문 생성 후 5분이내에 할 것.
+     * @param orderId
+     * @param authentication
+     * @return
+     */
     @PatchMapping("/{orderId}/cancle")
-    public ResponseEntity<ApiResponse<Void>> cancelOrder(){
+    public ResponseEntity<ApiResponse<Void>> cancelOrder(@PathVariable UUID orderId, Authentication authentication) {
+        orderService.cancleOrder(orderId, authentication);
         return ResponseEntity.ok(ApiResponse.success());
     }
 

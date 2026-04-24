@@ -1,6 +1,7 @@
 package com.sparta.deliveryorderplatform.store.entity;
 
 import com.sparta.deliveryorderplatform.category.entity.Category;
+import com.sparta.deliveryorderplatform.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,9 +23,9 @@ public class Store {
     private UUID id;
 
     // 연관관계 매핑: 가게 소유자 (User 엔티티의 username 필드와 매핑)
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "owner_id", referencedColumnName = "username", nullable = false)
-//    private User owner;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", referencedColumnName = "username", nullable = false)
+    private User owner;
 
     // 연관관계 매핑: 카테고리 (Category 엔티티의 category_id 필드와 매핑)
     @ManyToOne(fetch = FetchType.LAZY)

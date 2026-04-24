@@ -1,5 +1,7 @@
 package com.sparta.deliveryorderplatform.order.service;
 
+import com.sparta.deliveryorderplatform.global.exception.CustomException;
+import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import com.sparta.deliveryorderplatform.menu.entity.Menu;
 import com.sparta.deliveryorderplatform.menu.repository.MenuRepository;
 import com.sparta.deliveryorderplatform.order.dto.OrderItemRequestDto;
@@ -8,11 +10,9 @@ import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
 import com.sparta.deliveryorderplatform.order.entity.Order;
 import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
 import com.sparta.deliveryorderplatform.order.entity.OrderType;
+import com.sparta.deliveryorderplatform.order.prac.Address;
 import com.sparta.deliveryorderplatform.order.prac.AddressRepository;
 import com.sparta.deliveryorderplatform.order.prac.StoreRepository;
-import com.sparta.deliveryorderplatform.order.practice.Address;
-import com.sparta.deliveryorderplatform.order.practice.AddressRepository;
-import com.sparta.deliveryorderplatform.order.practice.StoreRepository;
 import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
 import com.sparta.deliveryorderplatform.store.entity.Store;
 import com.sparta.deliveryorderplatform.user.entity.User;
@@ -50,6 +50,30 @@ public class OrderService {
     @Autowired
     private OrderItemService orderItemService;
 
+
+    /**
+     * 주문 삭제 - MASTER만
+     * @param orderId 취소할 주문
+     * @param auth 사용자 인증 객체
+     * @return 취소된 주문
+     */
+    @Transactional
+    public OrderResponseDto deleteOrder(UUID orderId,  Authentication auth) {
+        // 사용자의 권한을 가져온다.
+        String role = auth.getAuthorities().iterator().next().getAuthority();
+
+        //권한이 마스터가 아닌 경우 예외를 던진다.
+        if(!"ROLE_MASTER".equals(role)){
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        //삭제할 Order를 가져온다.
+        Order deleteOrder = orderRepository.findById(orderId).orElseThrow(()-> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        //Order 엔티티의 삭제 인스턴스 메서드를 호출하여 삭제한다.
+        deleteOrder.softDelete(auth.getName());
+        return OrderResponseDto.from(deleteOrder);
+    }
+
     /**
      * 주문 상태 변경
      * - OWNER와 MASTER가 할 수 있음.
@@ -60,23 +84,23 @@ public class OrderService {
     @Transactional
     public void updateOrderStatus(UUID orderId, String status, Authentication auth){
         //가게 주인이 다른 가게 주문에 접근한 것인지 확인하기 위해 인증 객체에서 사용자의 username을 가져온다.
-        String   username = (String) auth.getPrincipal();
+        String   username = auth.getName();
 
         //변경할 현재 Order를 가져온다.
-        Order updateOrder = orderRepository.findById(orderId).orElseThrow(()->new IllegalArgumentException("조회된 주문이 없음."));
+        Order updateOrder = orderRepository.findById(orderId).orElseThrow(()->new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 사용자의 권한 목록 중 가장 첫번째를 가져온다.
         String role = auth.getAuthorities().iterator().next().getAuthority();
 
         // 고객은 status 변경 권한이 없음.
         if("ROLE_CUSTOMER".equals(role)) {
-            throw new AccessDeniedException("권한없음");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         // 권한이 가게 주인이지만, 다른 사람 가게 일 경우, 접근 제한
         if("ROLE_OWNER".equals(role)&&(!username.equals(updateOrder.getStore().getOwner()
             .getUsername()))) {
-            throw new AccessDeniedException("권한없음");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         // 본인 가게라면, status를 다음 단계로 변경 하도록 한다.
@@ -104,7 +128,7 @@ public class OrderService {
         String  username = (String) auth.getPrincipal();
 
         // 변경할 Order를 가져온다.
-        Order updateOrder = orderRepository.findById(orderId).orElseThrow(()-> new IllegalArgumentException("수정할 주문이 없습니다."));
+        Order updateOrder = orderRepository.findById(orderId).orElseThrow(()-> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 권한에 따른 Order 변경 작업을 위해 인증 객체에서 권한 목록을 가쟈온다.
         boolean isAllowed = auth.getAuthorities().stream()
@@ -130,13 +154,13 @@ public class OrderService {
 
         //OWNER가 접근하거나 CUSTOMER인데 다른 사람 주문에 접근한 경우 예외를 던진다.
         if(!isAllowed) {
-            throw new AccessDeniedException("권한 없음");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         //변경된 내용이 담긴 req를 통해 Store를 가져온다.
-        Store store =  storeRepository.findById(orderReq.getStoreId()).orElseThrow(() ->new IllegalArgumentException("가게가 없음."));
+        Store store =  storeRepository.findById(orderReq.getStoreId()).orElseThrow(() ->new CustomException(ErrorCode.STORE_NOT_FOUND));
         //변경된 내용이 담긴 req를 통해 Address를 가져온다.
-        Address address = addressRepository.findById(orderReq.getAddressId()).orElseThrow(() ->new IllegalArgumentException("주소가 없음."));
+        Address address = addressRepository.findById(orderReq.getAddressId()).orElseThrow(() ->new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         // Order 데이터 업데이트 (전체 필드 반영)
         updateOrder.update(orderReq,store,address);
