@@ -40,6 +40,9 @@ public enum ErrorCode {
 	ALREADY_CANCELLED(400, "ALREADY_CANCELLED", "이미 취소된 결제입니다."),
 	INVALID_PAYMENT_STATUS(400, "INVALID_PAYMENT_STATUS", "유효하지 않은 결제 상태 변경입니다."),
 
+	// review
+	REVIEW_NOT_FOUND(404, "REVIEW_NOT_FOUND", "리뷰를 찾을 수 없습니다."),
+
 	// jwt
 	INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
 	EXPIRED_TOKEN(401, "EXPIRED_TOKEN", "만료된 토큰입니다."),
