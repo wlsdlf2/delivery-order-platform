@@ -220,11 +220,11 @@ public class OrderService {
     public OrderResponseDto createOrder(OrderRequestDto orderRequestDto, String username) {
         // username으로 User를 조회 한다.
         User user = userRepository.findById(username).orElseThrow(() ->
-            new IllegalArgumentException("사용자 없음."));
+            new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 생성할 주문 데이터에서 store를 조회한다.
         Store store = storeRepository.findById(orderRequestDto.getStoreId()).orElseThrow(() ->
-            new IllegalArgumentException("가게없음."));
+            new CustomException(ErrorCode.STORE_NOT_FOUND));
 
         // 생성할 주문 데이터에서 address를 조회한다.
         Address address = addressRepository.findById(orderRequestDto.getAddressId()).orElseThrow(() ->

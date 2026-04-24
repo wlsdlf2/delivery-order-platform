@@ -11,7 +11,9 @@ import com.sparta.deliveryorderplatform.order.entity.OrderItem;
 import com.sparta.deliveryorderplatform.order.repository.OrderItemRepository;
 import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,30 +33,38 @@ public class OrderItemService {
 
     /**
      * 주문 생성 시, 주문 메뉴 추가.
-     * @param orderRequestDto : 주문 메뉴 객체
+     * @param createOrder : 주문 메뉴 객체
      */
     @Transactional
-    public void createOrderitem(OrderRequestDto orderRequestDto, UUID orderId) {
-        // 주문 요청 객체에서 주문 메뉴 리스트를 추출.
-        List<OrderItemRequestDto> items = orderRequestDto.getItems();
+    public void createOrderitem(OrderRequestDto createOrder, UUID orderId) {
+        //주문 요청에서 주문 메뉴 리스트를 가져온다.
+        List<OrderItemRequestDto> items = createOrder.getItems();
 
-        //새롭게 생성한 Order를 가져옴.
-        Order ordered = orderRepository.findById(orderId).orElseThrow(()-> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+        //새로 저장된 Order를 가져온다.
+        Order newOrder = orderRepository.findById(orderId).orElseThrow(()-> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
-        // DB에 저장 시킬 주문 메뉴 리스트 선언.
-        List<OrderItem> orderItems = new ArrayList<>();
+        //Menu리스트를 가져와 map 형태로 만든다.
+        List<UUID> menuIdList = items.stream().map(OrderItemRequestDto::getMenuId).toList();
+        List<Menu> MenuList = menuRepository.findAllById(menuIdList);
 
-        //주문 메뉴 만들기.
-        for (OrderItemRequestDto item : items) { // 주문메뉴 리스트를 반복,
-            // 주문 메뉴 안의 menuId로 Menu를 가져옴.
-            Menu orderedMenu = menuRepository.findById(item.getMenuId()).orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
-            //주문 메뉴들을 하나씩 만들어, 리스트에 저장.
-            orderItems.add(OrderItem.createOrderItem(ordered, orderedMenu, item.getQuantity(), orderedMenu.getPrice()));
+        Map<UUID,Menu> menuMap = new HashMap<>();
+
+        for(Menu menu : MenuList) {
+            menuMap.put(menu.getMenuId(), menu);
         }
 
-        // DB에 저장 시킬 주문 메뉴 리스트 선언.
-        orderItemRepository.saveAll(orderItems); // 이 리스트를 모두 DB에 저장.
+        //DB에 저장 시킬 createItems이다.
+        List<OrderItem> createItems = new ArrayList<>();
+
+        //items 수 만큼 반복하여
+        for(OrderItemRequestDto item : items) {
+            //개별적으로 Menu들을 뽑고
+            Menu menu = menuMap.get(item.getMenuId());
+            //createItems에 저장한다.
+            createItems.add(OrderItem.createOrderItem(newOrder,menu, item.getQuantity(), menu.getPrice()));
+        }
+
+        //DB에 한번에 저장 시킨다.
+        orderItemRepository.saveAll(createItems);
     }
-
-
 }
