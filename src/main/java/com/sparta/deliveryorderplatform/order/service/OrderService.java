@@ -52,11 +52,15 @@ public class OrderService {
     @Autowired
     private OrderItemService orderItemService;
 
+
+
+
     /**
      * 주문 취소
      * @param orderId  취소할 주문
      * @param auth     사용자 인증 객체
      */
+    @Transactional
     public void cancleOrder(UUID orderId, Authentication auth){
         //사용자 권한
         String role = auth.getAuthorities().iterator().next().getAuthority();
@@ -89,9 +93,9 @@ public class OrderService {
         if(duration.toMinutes() > 5) {
             throw new CustomException(ErrorCode.CANCLE_TIME_OUT);
         }
-
+        String status = "CANCLE";
         //모든 단계를 통과하면, 정상적으로 주문 상태를 취소 상태로 변경한다.
-        cancleOrder.statusUpdate("CANCLE");
+        cancleOrder.statusUpdate(status);
     }
 
     /**
@@ -168,7 +172,7 @@ public class OrderService {
     @Transactional
     public void updateOrderRequest(UUID orderId, OrderRequestDto orderReq, Authentication auth) {
         // 사용자 확인을 위해 인증 객체에서 username을 가져온다.
-        String  username = (String) auth.getPrincipal();
+        String  username = auth.getName();
 
         // 변경할 Order를 가져온다.
         Order updateOrder = orderRepository.findById(orderId).orElseThrow(()-> new CustomException(ErrorCode.ORDER_NOT_FOUND));
@@ -213,11 +217,12 @@ public class OrderService {
     /**
      * 주문 생성 - 주문 테이블만
      * @param orderRequestDto : 생성할 주문 데이터
-     * @param username        : 사용자 식별자
      * @return                : 생성된 주문을 응답.
      */
     @Transactional
-    public OrderResponseDto createOrder(OrderRequestDto orderRequestDto, String username) {
+    public OrderResponseDto createOrder(OrderRequestDto orderRequestDto, Authentication auth) {
+        String username = auth.getName();
+
         // username으로 User를 조회 한다.
         User user = userRepository.findById(username).orElseThrow(() ->
             new CustomException(ErrorCode.USER_NOT_FOUND));

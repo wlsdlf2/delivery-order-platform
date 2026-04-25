@@ -31,6 +31,9 @@ public class OrderController {
     private OrderService orderService;
     @Autowired
     private OrderItemService orderItemService;
+
+
+
     /**
      * 주문 취소 요청 - CUSTOEMR, MASTER
      * 주문 생성 후 5분이내에 할 것.
@@ -92,14 +95,14 @@ public class OrderController {
      * 주문 생성 및 주문 메뉴 추가.
      *
      * @param orderRequestDto : 주문 요청
-     * @param username        : 사용자 식별자
      * @return : 생성된 주문을 응답
      */
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResponseDto>> createOrder(
-        @RequestBody OrderRequestDto orderRequestDto, @AuthenticationPrincipal String username) {
+        @RequestBody OrderRequestDto orderRequestDto, Authentication authentication) {
+
         // 주문 생성
-        OrderResponseDto newOrder = orderService.createOrder(orderRequestDto, username);
+        OrderResponseDto newOrder = orderService.createOrder(orderRequestDto, authentication);
 
         // 주문 메뉴 추가.
         orderItemService.createOrderitem(orderRequestDto, newOrder.getOrderId());
