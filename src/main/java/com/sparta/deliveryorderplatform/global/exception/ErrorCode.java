@@ -23,6 +23,10 @@ public enum ErrorCode {
 	// menu
 	MENU_NOT_FOUND(404, "MENU_NOT_FOUND", "해당 상품이 존재하지 않습니다."),
 
+	//ai
+	AI_REQUEST_FAIL(500, "AI_REQUEST_FAIL", "AI 서비스의 요청이 실패했습니다."),
+	AI_RESPONSE_NULL(500, "AI_RESPONSE_NULL", "AI 서비스 응답이 null입니다."),
+
 	// category
   	DUPLICATE_CATEGORY_NAME(400, "DUPLICATE_CATEGORY_NAME", "이미 존재하는 카테고리명입니다."),
   	CATEGORY_NOT_FOUND(404, "CATEGORY_NOT_FOUND", "존재하지 않거나 삭제된 카테고리입니다."),

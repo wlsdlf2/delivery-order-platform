@@ -41,8 +41,6 @@ public class AiService {
     public AiResponseDto generateAiDescription(String aiPrompt, String username) {
         String url = geminiApiUrl + "?key=" + geminiApiKey;
 
-        log.info("sunny aiPrompt : {}", aiPrompt);
-
         Map<String, Object> body = Map.of(
                 "systemInstruction", Map.of(
                         "parts", List.of(
@@ -62,10 +60,16 @@ public class AiService {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
         ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+
+        //response null check
+        if (response.getBody() == null) {
+            throw new CustomException(ErrorCode.AI_REQUEST_FAIL);
+        }
         String responseBody = parseGeminiResponse(response.getBody());
 
         //p_ai_request_log 테이블에 요청 및 응답 값 저장
         User user = userRepository.findById(username).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        //requestType : 현재는 항상 고정 값
         Ai aiEntity = new Ai(user, aiPrompt, responseBody, "상품 설명 생성");
         aiRepository.save(aiEntity);
 

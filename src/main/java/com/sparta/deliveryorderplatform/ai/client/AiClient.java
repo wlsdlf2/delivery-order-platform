@@ -3,6 +3,8 @@ package com.sparta.deliveryorderplatform.ai.client;
 import com.sparta.deliveryorderplatform.ai.dto.AiRequestDto;
 import com.sparta.deliveryorderplatform.ai.dto.AiResponseDto;
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
+import com.sparta.deliveryorderplatform.global.exception.CustomException;
+import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +39,11 @@ public class AiClient {
                 request,                                //요청
                 new ParameterizedTypeReference<>() {}   //응답
         );
+
+        //response null check
+        if (response.getBody() == null || response.getBody().getData() == null) {
+            throw new CustomException(ErrorCode.AI_RESPONSE_NULL);
+        }
 
         return response.getBody().getData().getResult();
     }
