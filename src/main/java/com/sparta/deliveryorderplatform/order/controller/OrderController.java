@@ -40,12 +40,33 @@ public class OrderController {
     @Autowired
     private OrderItemService orderItemService;
 
+    /**
+     * 주문 상세 조회
+     * @param orderId 조회할 주문 식별자
+     * @param authentication 인증 객체
+     * @return 상세 주문 내역 응답
+     */
+    @GetMapping("/{orderId}")
+    public ResponseEntity<ApiResponse<OrderResponseDto>> getOrder(@PathVariable UUID orderId,
+        Authentication authentication) {
+        OrderResponseDto dto = orderService.getOrder(orderId, authentication);
+        return  ResponseEntity.ok(ApiResponse.success(dto));
 
+    }
+
+    /**
+     * 전체 목록 조회
+     *
+     * @param search  검색 조건 - 주문 상태, 가게
+     * @param pageable  페이징 조건
+     * @param authentication 인증 객체
+     * @return
+     */
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<OrderResponseDto>>> getOrders(OrderSearch search,
         @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Direction.DESC) Pageable pageable,
         Authentication authentication) {
-        PageResponse response = orderService.getAllOrders(search, pageable,authentication);
+        PageResponse response = orderService.getAllOrders(search, pageable, authentication);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

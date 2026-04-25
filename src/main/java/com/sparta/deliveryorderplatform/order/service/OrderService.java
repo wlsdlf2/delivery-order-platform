@@ -11,7 +11,6 @@ import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderSearch;
 import com.sparta.deliveryorderplatform.order.entity.Order;
 import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
-import com.sparta.deliveryorderplatform.order.entity.OrderType;
 import com.sparta.deliveryorderplatform.order.prac.Address;
 import com.sparta.deliveryorderplatform.order.prac.AddressRepository;
 import com.sparta.deliveryorderplatform.order.prac.StoreRepository;
@@ -28,7 +27,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,8 +54,39 @@ public class OrderService {
     @Autowired
     private OrderItemService orderItemService;
 
+    /**
+     * 주문 상세 조회
+     * @param orderId 조회할 주문 식별자
+     * @param auth 인증 객체
+     * @return 상세 주문 내역 응답
+     */
+    public OrderResponseDto getOrder(UUID orderId, Authentication auth){
+        String username = auth.getName();
+        String role = auth.getAuthorities().iterator().next().getAuthority();
+        Order detailOrder = orderRepository.findById(orderId).orElseThrow(()-> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
+        //OWNER인 경우, 본인 가게로의 주문이 아니라면
+        if("ROLE_OWNER".equals(role)&& !username.equals(detailOrder.getStore().getOwner().getUsername())) {
+            throw  new CustomException(ErrorCode.UNAUTHORIZED_ACCESS); // 접근 제한.
+        }
 
+        //CUSTOMER인 경우, 자기의 주문이 아니라면
+        if("ROLE_CUSTOMER".equals(role) && !username.equals(detailOrder.getUser().getUsername())) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS); // 접근제한
+        }
+
+        //관리자의 경우 모든 주문의 접근이 가능하므로, 제한 안함.
+
+        return OrderResponseDto.from(detailOrder);
+    }
+
+    /**
+     * 전체 목록 조회
+     * @param search  검색 조건 - 주문 상태, 가게
+     * @param page  페이징 조건
+     * @param auth 인증 객체
+     * @return
+     */
     public PageResponse getAllOrders(OrderSearch search, Pageable page, Authentication auth) {
         // 사용자의 권한을 가져온다.
         String role = auth.getAuthorities().iterator().next().getAuthority();
