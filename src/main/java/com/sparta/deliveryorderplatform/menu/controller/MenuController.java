@@ -4,7 +4,6 @@ import com.sparta.deliveryorderplatform.global.common.ApiResponse;
 import com.sparta.deliveryorderplatform.menu.dto.MenuRequestDto;
 import com.sparta.deliveryorderplatform.menu.dto.MenuResponseDto;
 import com.sparta.deliveryorderplatform.menu.service.MenuService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +26,12 @@ public class MenuController {
     public ResponseEntity<?> createMenu(@PathVariable UUID storeId,
                                         @Valid @RequestBody MenuRequestDto requestDto,
                                         Authentication authentication,
-                                        HttpServletRequest request) {
-        menuService.createMenu(requestDto, storeId, authentication, request);
+                                        @RequestHeader("Authorization") String authHeader) {
+
+        //내부 client 호출을 위한 토큰 전달
+        String token = authHeader.substring(7);
+
+        menuService.createMenu(requestDto, storeId, authentication, token);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
