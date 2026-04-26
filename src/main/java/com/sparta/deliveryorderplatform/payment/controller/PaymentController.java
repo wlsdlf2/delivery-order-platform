@@ -1,6 +1,7 @@
 package com.sparta.deliveryorderplatform.payment.controller;
 
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
+import com.sparta.deliveryorderplatform.global.common.PageResponse;
 import com.sparta.deliveryorderplatform.payment.dto.request.UpdatePaymentStatusRequest;
 import com.sparta.deliveryorderplatform.payment.dto.request.CreatePaymentRequest;
 import com.sparta.deliveryorderplatform.payment.dto.response.PaymentResponse;
@@ -55,7 +56,7 @@ public class PaymentController {
 
         Page<PaymentResponse> response = paymentService.getPaymentList(page, size, username, role);
 
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(PageResponse.of(response)));
     }
 
     /**
