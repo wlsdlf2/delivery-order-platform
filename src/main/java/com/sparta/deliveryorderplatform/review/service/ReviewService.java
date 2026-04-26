@@ -2,6 +2,9 @@ package com.sparta.deliveryorderplatform.review.service;
 
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.order.entity.Order;
+import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
+import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
 import com.sparta.deliveryorderplatform.review.dto.request.CreateReviewRequest;
 import com.sparta.deliveryorderplatform.review.dto.request.SearchReviewCondition;
 import com.sparta.deliveryorderplatform.review.dto.request.UpdateReviewRequest;
@@ -10,7 +13,6 @@ import com.sparta.deliveryorderplatform.review.entity.Review;
 import com.sparta.deliveryorderplatform.review.repository.ReviewRepository;
 import com.sparta.deliveryorderplatform.user.entity.User;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
-import com.sparta.deliveryorderplatform.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,23 +28,32 @@ import java.util.UUID;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
 
     @Transactional
-    public ReviewResponse createReview(UUID orderId, String username,
+    public ReviewResponse createReview(UUID orderId, User user,
                                        CreateReviewRequest request) {
 
-        // Order 찾는 로직(1주문 1리뷰), 주문 상태가 Completed인 경우에만 ㄱㄴ
-
-        // User 찾는 로직
-        User user = userRepository.findById(username).orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
         );
 
-        // store 찾는 로직
+        // 주문 상태 completed 여부 검증
+        if (!order.getStatus().equals(OrderStatus.COMPLETED)) {
+            throw new CustomException(ErrorCode.REVIEW_ORDER_NOT_COMPLETED);
+        }
 
-        Review review = Review.create(orderId, request.getStoreId(),
-                user, request.getRating(), request.getContent());
+        // 1주문 1리뷰 검증
+        if (reviewRepository.existsByOrder(order)) {
+            throw new CustomException(ErrorCode.REVIEW_ALREADY_EXISTS);
+        }
+
+        // 본인 주문 건에만 리뷰 등록 가능
+        if (!order.getUser().getUsername().equals(user.getUsername())) {
+            throw new CustomException(ErrorCode.REVIEW_UNAUTHORIZED);
+        }
+
+        Review review = Review.create(order, request.getRating(), request.getContent());
 
         return ReviewResponse.from(reviewRepository.save(review));
     }
@@ -72,13 +83,13 @@ public class ReviewService {
     }
 
     @Transactional
-    public ReviewResponse updateReview(UUID reviewId, UpdateReviewRequest request, String username) {
+    public ReviewResponse updateReview(UUID reviewId, UpdateReviewRequest request, User user) {
 
         Review review = this.findReviewById(reviewId);
 
         // 본인 리뷰만 수정 가능하도록
-        if (!review.getUser().getUsername().equals(username)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        if (!review.getUser().getUsername().equals(user.getUsername())) {
+            throw new CustomException(ErrorCode.REVIEW_UPDATE_FORBIDDEN);
         }
 
         review.update(request.getRating(), request.getContent());
@@ -87,16 +98,21 @@ public class ReviewService {
     }
 
     @Transactional
-    public void deleteReview(UUID reviewId, String username, String role) {
+    public void deleteReview(UUID reviewId, User user, String role) {
 
         Review review = this.findReviewById(reviewId);
 
-        // 본인 리뷰만 삭제 가능(manager&master는 모두 허용)
-        if (role.equals(UserRole.CUSTOMER.getAuthority()) && !review.getUser().getUsername().equals(username)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        // customer인 경우 본인 리뷰인지 검증
+        if (role.equals(UserRole.CUSTOMER.getAuthority()) &&
+                !review.getUser().getUsername().equals(user.getUsername())) {
+            throw new CustomException(ErrorCode.REVIEW_DELETE_FORBIDDEN);
         }
 
-        review.softDelete(username);
+        if (role.equals(UserRole.OWNER.getAuthority())) {
+            throw new CustomException(ErrorCode.REVIEW_DELETE_FORBIDDEN);
+        }
+
+        review.softDelete(user.getUsername());
     }
 
     private Review findReviewById(UUID id) {

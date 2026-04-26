@@ -43,6 +43,15 @@ public enum ErrorCode {
 	// review
 	REVIEW_NOT_FOUND(404, "REVIEW_NOT_FOUND", "리뷰를 찾을 수 없습니다."),
 	INVALID_RATING(400, "INVALID_RATING", "평점은 1~5 사이여야 합니다."),
+	REVIEW_ALREADY_EXISTS(409, "REVIEW_ALREADY_EXISTS", "이미 해당 주문에 대한 리뷰가 존재합니다."),
+	REVIEW_ORDER_NOT_COMPLETED(400, "REVIEW_ORDER_NOT_COMPLETED", "완료된 주문에만 리뷰를 작성할 수 있습니다."),
+	REVIEW_UNAUTHORIZED(403, "REVIEW_UNAUTHORIZED", "본인의 주문에만 리뷰를 작성할 수 있습니다."),
+	REVIEW_DELETE_FORBIDDEN(403, "REVIEW_DELETE_FORBIDDEN", "리뷰 삭제 권한이 없습니다."),
+	REVIEW_UPDATE_FORBIDDEN(403, "REVIEW_UPDATE_FORBIDDEN", "본인의 리뷰만 수정할 수 있습니다."),
+
+	//Order
+	ORDER_NOT_FOUND(404,"ORDER_NOT_FOUND","주문을 찾을 수 없습니다."),
+	CANCLE_TIME_OUT(400, "CANCLE_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
 
 	// jwt
 	INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),

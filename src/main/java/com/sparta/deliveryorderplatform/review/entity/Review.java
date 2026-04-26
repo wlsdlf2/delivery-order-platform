@@ -54,7 +54,7 @@ public class Review extends BaseAuditEntity {
         this.content = content;
     }
 
-    public static Review create(Order order, Store store, User user, Integer rating, String content) {
+    public static Review create(Order order, Integer rating, String content) {
 
         if (rating == null || rating < 1 || rating > 5) {
             throw new CustomException(ErrorCode.INVALID_RATING);
@@ -62,8 +62,8 @@ public class Review extends BaseAuditEntity {
 
         return Review.builder()
                 .order(order)
-                .store(store)
-                .user(user)
+                .store(order.getStore())
+                .user(order.getUser())
                 .rating(rating)
                 .content(content)
                 .build();
