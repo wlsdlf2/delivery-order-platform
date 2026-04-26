@@ -2,16 +2,16 @@ package com.sparta.deliveryorderplatform.payment.controller;
 
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
 import com.sparta.deliveryorderplatform.global.common.PageResponse;
-import com.sparta.deliveryorderplatform.payment.dto.request.UpdatePaymentStatusRequest;
 import com.sparta.deliveryorderplatform.payment.dto.request.CreatePaymentRequest;
+import com.sparta.deliveryorderplatform.payment.dto.request.UpdatePaymentStatusRequest;
 import com.sparta.deliveryorderplatform.payment.dto.response.PaymentResponse;
 import com.sparta.deliveryorderplatform.payment.service.PaymentService;
+import com.sparta.deliveryorderplatform.user.security.UserDetailsImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,50 +27,58 @@ public class PaymentController {
 
     /**
      * 결제 처리 api
-     * todo : 권한 처리, 주문 정보 받아와서 금액 등 넣어야 함
      * @param orderId
      * @param request
+     * @param userDetails
      * @return
      */
     @PostMapping("/orders/{orderId}/payments")
     public ResponseEntity<?> createPayment(@PathVariable UUID orderId,
                                            @Valid @RequestBody CreatePaymentRequest request,
-                                           @AuthenticationPrincipal String username) {
+                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        PaymentResponse response = paymentService.createPayment(orderId, request, username);
+        PaymentResponse response = paymentService.createPayment(orderId, request, userDetails.getUser());
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
      * 결제 목록 조회 api
+     * @param page
+     * @param size
+     * @param userDetails
      * @return
      */
     @GetMapping("/payments")
     public ResponseEntity<?> getPaymentList(@RequestParam(defaultValue = "0") int page,
                                             @RequestParam(defaultValue = "10") int size,
-                                            Authentication authentication) {
+                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        String username = (String) authentication.getPrincipal();
-        String role = authentication.getAuthorities().iterator().next().getAuthority();
-
-        Page<PaymentResponse> response = paymentService.getPaymentList(page, size, username, role);
+        Page<PaymentResponse> response = paymentService.getPaymentList(
+                page,
+                size,
+                userDetails.getUser(),
+                userDetails.getAuthorities().iterator().next().getAuthority()
+        );
 
         return ResponseEntity.ok(ApiResponse.success(PageResponse.of(response)));
     }
 
     /**
      * 결제 상세 조회 api
+     * @param paymentId
+     * @param userDetails
      * @return
      */
     @GetMapping("/payments/{paymentId}")
     public ResponseEntity<?> getPaymentById(@PathVariable UUID paymentId,
-                                            Authentication authentication) {
+                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        String username = (String) authentication.getPrincipal();
-        String role = authentication.getAuthorities().iterator().next().getAuthority();
-
-        PaymentResponse response = paymentService.getPaymentById(paymentId, username, role);
+        PaymentResponse response = paymentService.getPaymentById(
+                paymentId,
+                userDetails.getUser(),
+                userDetails.getAuthorities().iterator().next().getAuthority()
+        );
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -94,15 +102,15 @@ public class PaymentController {
     /**
      * 결제 삭제 api(soft delete)
      * @param paymentId
-     * @param username
+     * @param userDetails
      * @return
      */
     @PreAuthorize("hasRole('MASTER')")
     @DeleteMapping("/payments/{paymentId}")
     public ResponseEntity<?> deletePayment(@PathVariable UUID paymentId,
-                                           @AuthenticationPrincipal String username) {
+                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        paymentService.deletePayment(paymentId, username);
+        paymentService.deletePayment(paymentId, userDetails.getUser());
 
         return ResponseEntity.ok(ApiResponse.success());
     }

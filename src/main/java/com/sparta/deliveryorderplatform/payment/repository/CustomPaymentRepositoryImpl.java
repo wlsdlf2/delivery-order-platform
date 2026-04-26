@@ -62,7 +62,12 @@ public class CustomPaymentRepositoryImpl implements CustomPaymentRepository{
         builder.and(QPayment.payment.deletedAt.isNull());
 
         if (role.equals(UserRole.CUSTOMER.getAuthority())) {
-            builder.and(QPayment.payment.username.eq(username));
+            builder.and(QPayment.payment.user.username.eq(username));
+        }
+
+        // todo : 본인 가게 결제 내역도 조회 가능하도록 수정 필요 (Store 연관관계 완성 후)
+        if (role.equals(UserRole.OWNER.getAuthority())) {
+            builder.and(QPayment.payment.user.username.eq(username));
         }
 
         return builder;

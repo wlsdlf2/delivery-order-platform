@@ -29,11 +29,11 @@ public class PaymentResponse {
     public static PaymentResponse from(Payment payment) {
         return PaymentResponse.builder()
                 .paymentId(payment.getId())
-                .orderId(payment.getOrderId())
+                .orderId(payment.getOrder().getId())
                 .paymentStatus(payment.getPaymentStatus())
                 .paymentMethod(payment.getPaymentMethod())
                 .amount(payment.getAmount())
-                .username(payment.getUsername())
+                .username(payment.getUser().getUsername())
                 .build();
     }
 }

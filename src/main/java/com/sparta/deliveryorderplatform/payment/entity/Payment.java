@@ -3,7 +3,9 @@ package com.sparta.deliveryorderplatform.payment.entity;
 import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.order.entity.Order;
 import com.sparta.deliveryorderplatform.payment.dto.request.UpdatePaymentStatusRequest;
+import com.sparta.deliveryorderplatform.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,8 +26,9 @@ public class Payment extends BaseAuditEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
-    private UUID orderId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
@@ -40,14 +43,15 @@ public class Payment extends BaseAuditEntity {
     @Column(nullable = false)
     private Integer amount;
 
-    @Column(nullable = false)
-    private String username;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    public static Payment create(UUID orderId, Integer amount, String username) {
+    public static Payment create(Order order, Integer amount, User user) {
         return Payment.builder()
-                .orderId(orderId)
+                .order(order)
                 .amount(amount)
-                .username(username)
+                .user(user)
                 .paymentStatus(PaymentStatus.COMPLETED)
                 .build();
     }
