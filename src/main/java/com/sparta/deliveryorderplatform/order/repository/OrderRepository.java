@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, UUID> {
-    Page<Order> findAllByStoreId(UUID storeId, Pageable pageable);
-    Page<Order> findAllByStatusandUserusername(String status, String username, Pageable pageable);
-    Page<Order> findAllByUserusername(String username, Pageable pageable);
+    Page<Order> findAllByStore_Id(UUID storeId, Pageable pageable);
+    Page<Order> findAllByStatusAndUser_username(String status, String username, Pageable pageable);
+    Page<Order> findAllByUser_username(String username, Pageable pageable);
 }

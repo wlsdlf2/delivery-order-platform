@@ -95,13 +95,13 @@ public class OrderService {
 
         //권한별로 확인하여, 주문 목록을 달리 보여준다.
         if("ROLE_OWNER".equals(role)) { //가게 주인인 경우
-            orderPage = orderRepository.findAllByStoreId(search.getStoreId(),page);  //자기 가게로의 주문 목록만 확인한다.
+            orderPage = orderRepository.findAllByStore_Id(search.getStoreId(),page);  //자기 가게로의 주문 목록만 확인한다.
         } else if("ROLE_CUSTOMER".equals(role)) {
             if(search.getStatus() == null){ //사용자가 주문 상태를 선택하지 않았다면,
-                orderPage = orderRepository.findAllByUserusername(username, page); // 자기가 했던 주문만 나오도록 한다.
+                orderPage = orderRepository.findAllByUser_username(username, page); // 자기가 했던 주문만 나오도록 한다.
             } else {
                 //그게 아니라면, 나의 주문 중 내가 선택한 주문 상태 목록을 가져온다.
-                orderPage = orderRepository.findAllByStatusandUserusername(search.getStatus(),username,page);
+                orderPage = orderRepository.findAllByStatusAndUser_username(search.getStatus(),username,page);
             }
         } else {
             orderPage = orderRepository.findAll(page);
