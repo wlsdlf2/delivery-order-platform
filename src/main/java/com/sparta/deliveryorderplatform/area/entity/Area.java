@@ -1,7 +1,11 @@
 package com.sparta.deliveryorderplatform.area.entity;
 
+import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
+import com.sparta.deliveryorderplatform.global.exception.CustomException;
+import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,7 +16,7 @@ import java.util.UUID;
 @Builder(access = AccessLevel.PRIVATE)
 @Table(name = "p_area")
 @Entity
-public class Area {
+public class Area extends BaseAuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -20,7 +24,7 @@ public class Area {
     private UUID id;
 
     // 지역명(ex.광화문)
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 100)
     private String name;
 
     //  시 or 도
@@ -35,41 +39,41 @@ public class Area {
     @Builder.Default
     private Boolean isActive = true;
 
-    public static Area createArea(String name, String city, String district, String username) {
-        if (name == null || city == null || district == null) {
-            throw new IllegalArgumentException("운영지역 정보(명칭, 시/도, 구/군) 누락");
-        }
+    public static Area create(String name, String city, String district) {
+        validateLocation(name, city, district);
 
         return Area.builder()
             .name(name)
             .city(city)
             .district(district)
-//            .createdBy(username)
             .build();
     }
 
     // 지역 기본 정보 수정
-    public void updateArea(String name, String city, String district, String username) {
-        if (name == null || city == null || district == null) {
-            throw new IllegalArgumentException("운영지역 정보(명칭, 시/도, 구/군) 누락");
-        }
+    public void update(String name, String city, String district, Boolean isActive) {
+        validateLocation(name, city, district);
 
         this.name = name;
         this.city = city;
         this.district = district;
-//        this.updatedBy = updatedBy;
+        if (isActive != null) {
+            this.isActive = isActive;
+        }
     }
 
-    // 운영 지역 활성화/비활성화 스위칭
-    public void updateActiveStatus(boolean isActive, String username) {
-        this.isActive = isActive;
-//        this.updatedBy = updatedBy;
-    }
-
-    public void deleteArea(String username) {
+    // 운영 지역 삭제
+    public void delete(String username) {
+        super.softDelete(username);
         this.isActive = false;
-//        this.deletedAt = LocalDateTime.now();
-//        this.deletedBy = deletedBy;
     }
 
+    private static void validateLocation(String name, String city, String district) {
+        if (isInvalid(name) || isInvalid(city) || isInvalid(district)) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR);
+        }
+    }
+
+    private static boolean isInvalid(String str) {
+        return str == null || str.isBlank();
+    }
 }

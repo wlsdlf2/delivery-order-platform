@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, String>, UserRepositoryCustom {
 
 	boolean existsByEmail (@NotBlank(message = "이메일을 입력해주세요.") @Email String email);
 }
