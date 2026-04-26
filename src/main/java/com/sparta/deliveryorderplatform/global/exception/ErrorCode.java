@@ -42,6 +42,7 @@ public enum ErrorCode {
 
 	// review
 	REVIEW_NOT_FOUND(404, "REVIEW_NOT_FOUND", "리뷰를 찾을 수 없습니다."),
+	INVALID_RATING(400, "INVALID_RATING", "평점은 1~5 사이여야 합니다."),
 
 	// jwt
 	INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
