@@ -2,12 +2,16 @@ package com.sparta.deliveryorderplatform.payment.service;
 
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.order.entity.Order;
+import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
 import com.sparta.deliveryorderplatform.payment.dto.request.CreatePaymentRequest;
 import com.sparta.deliveryorderplatform.payment.dto.request.UpdatePaymentStatusRequest;
 import com.sparta.deliveryorderplatform.payment.dto.response.PaymentResponse;
 import com.sparta.deliveryorderplatform.payment.entity.Payment;
 import com.sparta.deliveryorderplatform.payment.entity.PaymentMethod;
 import com.sparta.deliveryorderplatform.payment.repository.PaymentRepository;
+import com.sparta.deliveryorderplatform.user.entity.User;
+import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,17 +26,35 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final OrderRepository orderRepository;
 
     @Transactional
-    public PaymentResponse createPayment(UUID orderId, CreatePaymentRequest request) {
+    public PaymentResponse createPayment(UUID orderId, CreatePaymentRequest request, User user) {
 
         if (request.getPaymentMethod() != PaymentMethod.CARD) {
             throw new CustomException(ErrorCode.INVALID_PAYMENT_METHOD);
         }
 
-        // 실제 주문 금액이랑 결제 요청 금액 비교 로직 추가
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new CustomException(ErrorCode.ORDER_NOT_FOUND)
+        );
 
-        Payment payment = Payment.create(orderId, request.getAmount());
+        // 주문한 사람이랑 결제 요청한 사람이랑 비교
+        if (!order.getUser().getUsername().equals(user.getUsername())) {
+            throw new CustomException(ErrorCode.PAYMENT_USER_MISMATCH);
+        }
+
+        // 결제 중복 체크
+        if (paymentRepository.existsByOrder(order)) {
+            throw new CustomException(ErrorCode.PAYMENT_ALREADY_EXISTS);
+        }
+
+        // 실제 주문 금액이랑 결제 요청 금액 비교
+        if (!request.getAmount().equals(order.getTotalPrice())) {
+            throw new CustomException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+
+        Payment payment = Payment.create(order, request.getAmount(), user);
 
         paymentRepository.save(payment);
 
@@ -40,7 +62,7 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PaymentResponse> getPaymentList(int page, int size) {
+    public Page<PaymentResponse> getPaymentList(int page, int size, User user, String role) {
 
         if (size != 10 && size != 30 && size != 50) {
             size = 10;
@@ -48,13 +70,31 @@ public class PaymentService {
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        return paymentRepository.findAllByDeletedAtIsNull(pageRequest).map(PaymentResponse::from);
+        return paymentRepository.findPaymentList(user.getUsername(), role, pageRequest).map(PaymentResponse::from);
     }
 
     @Transactional(readOnly = true)
-    public PaymentResponse getPaymentById(UUID paymentId) {
+    public PaymentResponse getPaymentById(UUID paymentId, User user, String role) {
 
-        return PaymentResponse.from(this.findPaymentById(paymentId));
+        Payment payment = findPaymentById(paymentId);
+
+        String username = user.getUsername();
+
+        // customer는 본인 것만 조회 가능
+        if (role.equals(UserRole.CUSTOMER.getAuthority()) &&
+                !payment.getUser().getUsername().equals(username)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        // owner는 본인, 본인 가게 결제만 조회 가능
+        // todo : store owner 확인 로직 추가 (Store 연관관계 완성 후)
+        if (role.equals(UserRole.OWNER.getAuthority())) {
+            if (!payment.getUser().getUsername().equals(username)) {
+                throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+            }
+        }
+
+        return PaymentResponse.from(payment);
     }
 
     @Transactional
@@ -68,11 +108,11 @@ public class PaymentService {
     }
 
     @Transactional
-    public void deletePayment(UUID paymentId) {
+    public void deletePayment(UUID paymentId, User user) {
 
         Payment payment = this.findPaymentById(paymentId);
 
-        payment.softDelete("user");
+        payment.softDelete(user.getUsername());
     }
 
     private Payment findPaymentById(UUID paymentId) {
