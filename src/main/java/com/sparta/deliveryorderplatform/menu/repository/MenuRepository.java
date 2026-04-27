@@ -4,7 +4,11 @@ import com.sparta.deliveryorderplatform.menu.entity.Menu;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,5 +28,15 @@ public interface MenuRepository extends JpaRepository<Menu, UUID> {
     Page<Menu> findByStore_idAndDeletedAtIsNull(UUID storeId, Pageable pageRequest);
 
     Optional<Menu> findByMenuIdAndDeletedAtIsNull(UUID menuId);
+
+    //isHidden all update
+    @Modifying
+    @Query("UPDATE Menu m SET m.isHidden = :isHidden WHERE m.store.id = :storeId ")
+    void updateIsHiddenByStoreId(@Param("storeId") UUID storeId, @Param("isHidden") boolean isHidden);
+
+    //softDelete all
+    @Modifying
+    @Query("UPDATE Menu m SET m.deletedAt = :deletedAt, m.deletedBy = :deletedBy WHERE m.store.id = :storeId")
+    void softDelete(@Param("storeId") UUID storeId, @Param("deletedAt") LocalDateTime deletedAt, @Param("deletedBy") String deletedBy);
 
 }
