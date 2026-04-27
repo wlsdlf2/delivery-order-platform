@@ -67,15 +67,14 @@ public class StoreService {
             return StoreResponseDTO.from(store);
         }
 
-        // 2. OWNER: 본인 가게만 조회 가능
+        // 2. OWNER: 본인 가게일 경우 숨김 여부 상관없이 조회 가능
         if (user.getRole() == UserRole.OWNER) {
             if (store.getOwner().getUsername().equals(user.getUsername())) {
-                return StoreResponseDTO.from(store);
+                return StoreResponseDTO.from(store);    // 본인 가게
             }
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
-        // 3. 그 외(CUSTOMER 등): 숨김 처리된 가게는 조회 불가
+        // 3. 그 외(CUSTOMER, 타 가게 OWNER): 숨김 처리된 가게는 조회 불가
         if (Boolean.TRUE.equals(store.getIsHidden())) {
             throw new CustomException(ErrorCode.STORE_NOT_FOUND);
         }
