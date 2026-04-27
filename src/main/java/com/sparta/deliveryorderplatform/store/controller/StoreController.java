@@ -81,7 +81,7 @@ public class StoreController {
     }
 
     // delete
-    @PatchMapping("/{storeId}")
+    @DeleteMapping("/{storeId}")
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
     public ResponseEntity<ApiResponse<StoreResponseDTO>> deleteStore(
             @PathVariable UUID storeId,
