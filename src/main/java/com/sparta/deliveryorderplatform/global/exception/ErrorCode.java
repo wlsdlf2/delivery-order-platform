@@ -39,9 +39,17 @@ public enum ErrorCode {
 	PAYMENT_NOT_FOUND(404, "PAYMENT_NOT_FOUND", "결제 정보를 찾을 수 없습니다."),
 	ALREADY_CANCELLED(400, "ALREADY_CANCELLED", "이미 취소된 결제입니다."),
 	INVALID_PAYMENT_STATUS(400, "INVALID_PAYMENT_STATUS", "유효하지 않은 결제 상태 변경입니다."),
+	PAYMENT_USER_MISMATCH(403, "PAYMENT_USER_MISMATCH", "주문자와 결제 요청자가 일치하지 않습니다."),
+	PAYMENT_AMOUNT_MISMATCH(400, "PAYMENT_AMOUNT_MISMATCH", "결제 금액이 주문 금액과 일치하지 않습니다."),
+	PAYMENT_ALREADY_EXISTS(409, "PAYMENT_ALREADY_EXISTS", "이미 결제가 완료된 주문입니다."),
 
 	// review
 	REVIEW_NOT_FOUND(404, "REVIEW_NOT_FOUND", "리뷰를 찾을 수 없습니다."),
+
+	//Order
+	ORDER_NOT_FOUND(404,"ORDER_NOT_FOUND","주문을 찾을 수 없습니다."),
+	CANCLE_TIME_OUT(400, "CANCLE_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
+  EXIST_ACTIVE_ORDERS(409, "EXIST_ACTIVE_ORDERS", "진행 중인 주문이 있어 처리할 수 없습니다."),
 
 	// jwt
 	INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
@@ -50,8 +58,7 @@ public enum ErrorCode {
 	WRONG_TOKEN(401, "WRONG_TOKEN", "잘못된 토큰 서명입니다."),
 	TOKEN_NOT_FOUND(401, "TOKEN_NOT_FOUND", "토큰을 찾을 수 없습니다."),
 
-	// order
-	EXIST_ACTIVE_ORDERS(409, "EXIST_ACTIVE_ORDERS", "진행 중인 주문이 있어 처리할 수 없습니다.");
+	ADDRESS_NOT_FOUND(401, "ADDRESS_NOT_FOUND", "배송지를 찾을 수 없습니다.");
 
 
 	private final int status;
