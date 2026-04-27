@@ -1,6 +1,7 @@
 package com.sparta.deliveryorderplatform.menu.controller;
 
 import com.sparta.deliveryorderplatform.global.common.ApiResponse;
+import com.sparta.deliveryorderplatform.global.common.PageResponse;
 import com.sparta.deliveryorderplatform.menu.dto.MenuRequestDto;
 import com.sparta.deliveryorderplatform.menu.dto.MenuResponseDto;
 import com.sparta.deliveryorderplatform.menu.service.MenuService;
@@ -55,7 +56,7 @@ public class MenuController {
                                       @PageableDefault(size = 10, page = 0) Pageable pageable) {
 
         Page<MenuResponseDto> menuResponseDto = menuService.getMenuList(storeId, keyword, sortField, sortDirection, userDetails, pageable);
-        return ResponseEntity.ok(ApiResponse.success(menuResponseDto));
+        return ResponseEntity.ok(ApiResponse.success(PageResponse.of(menuResponseDto)));
     }
 
     @PreAuthorize("hasRole('MASTER') or hasRole('OWNER')")
