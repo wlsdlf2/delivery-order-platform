@@ -108,10 +108,6 @@ public class ReviewService {
             throw new CustomException(ErrorCode.REVIEW_DELETE_FORBIDDEN);
         }
 
-        if (role.equals(UserRole.OWNER.getAuthority())) {
-            throw new CustomException(ErrorCode.REVIEW_DELETE_FORBIDDEN);
-        }
-
         review.softDelete(user.getUsername());
     }
 
