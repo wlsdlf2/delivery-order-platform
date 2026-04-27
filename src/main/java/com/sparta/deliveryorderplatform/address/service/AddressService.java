@@ -50,7 +50,7 @@ public class AddressService {
 		if (user.getRole() == UserRole.MASTER) {
 			addressPage = addressRepository.findAll(pageable);
 		} else {
-			addressPage = addressRepository.findByUser(user, pageable);
+			addressPage = addressRepository.findByUserAndDeletedAtIsNull(user, pageable);
 		}
 
 		return addressPage.map(AddressResponse::from);
