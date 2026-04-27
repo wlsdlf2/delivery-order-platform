@@ -25,7 +25,7 @@ public class AreaRepositoryImpl implements AreaRepositoryCustom {
             .selectFrom(area)
             .where(
                 containsKeyword(searchDTO.getKeyword()),
-                isActiveStatus(searchDTO.getIsActive(), searchDTO.getIsAdmin()),
+                isActiveStatus(searchDTO.getIsActive()),
                 area.deletedAt.isNull() // 삭제된 데이터를 노출하지 않도록 고정
             )
             .offset(pageable.getOffset())
@@ -38,7 +38,7 @@ public class AreaRepositoryImpl implements AreaRepositoryCustom {
             .from(area)
             .where(
                 containsKeyword(searchDTO.getKeyword()),
-                isActiveStatus(searchDTO.getIsActive(), searchDTO.getIsAdmin()),
+                isActiveStatus(searchDTO.getIsActive()),
                 area.deletedAt.isNull()
             )
             .fetchOne();
@@ -57,13 +57,7 @@ public class AreaRepositoryImpl implements AreaRepositoryCustom {
     }
 
     // 활성화여부 조건
-    private BooleanExpression isActiveStatus(Boolean isActive, Boolean isAdmin) {
-        // 일반 사용자 -> 항상 active true만 조회
-        if (!Boolean.TRUE.equals(isAdmin)) {
-            return area.isActive.eq(true);
-        }
-
-        // 관리자 -> isActive 가 있을 경우만 필터 적용
+    private BooleanExpression isActiveStatus(Boolean isActive) {
         return isActive != null ? area.isActive.eq(isActive) : null;
     }
 

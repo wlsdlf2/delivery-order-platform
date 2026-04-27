@@ -37,6 +37,7 @@ public enum ErrorCode {
 
 	// store
 	STORE_NOT_FOUND(404, "STORE_NOT_FOUND", "존재하지 않거나 삭제된 가게입니다."),
+	EXIST_LINKED_STORES(409, "EXIST_LINKED_STORES", "등록된 가게가 있어 처리할 수 없습니다."),
 
 	// payment
 	INVALID_PAYMENT_METHOD(400, "INVALID_PAYMENT_METHOD", "올바른 결제 수단을 선택해 주세요"),
@@ -59,11 +60,11 @@ public enum ErrorCode {
 	//Order
 	ORDER_NOT_FOUND(404,"ORDER_NOT_FOUND","주문을 찾을 수 없습니다."),
 	CANCLE_TIME_OUT(400, "CANCLE_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
+	EXIST_ACTIVE_ORDERS(409, "EXIST_ACTIVE_ORDERS", "진행 중인 주문이 있어 처리할 수 없습니다."),
 
 	//Order
 	ORDER_NOT_FOUND(404,"ORDER_NOT_FOUND","주문을 찾을 수 없습니다."),
-	CANCLE_TIME_OUT(400, "CANCLE_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
-  EXIST_ACTIVE_ORDERS(409, "EXIST_ACTIVE_ORDERS", "진행 중인 주문이 있어 처리할 수 없습니다."),
+	CANCEL_TIME_OUT(400, "CANCEL_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
 
 	// jwt
 	INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
