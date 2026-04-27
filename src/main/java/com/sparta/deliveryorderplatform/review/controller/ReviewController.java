@@ -7,13 +7,14 @@ import com.sparta.deliveryorderplatform.review.dto.request.SearchReviewCondition
 import com.sparta.deliveryorderplatform.review.dto.request.UpdateReviewRequest;
 import com.sparta.deliveryorderplatform.review.dto.response.ReviewResponse;
 import com.sparta.deliveryorderplatform.review.service.ReviewService;
+import com.sparta.deliveryorderplatform.user.security.UserDetailsImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,24 +29,26 @@ public class ReviewController {
 
     /**
      * 리뷰 등록 api
-     * todo : 주문 상태가 COMPLETED인 경우만 등록 가능, 본인 주문 건에만 리뷰 등록 가능
-     * todo : store, order 처리 로직 추가해야 함
      * @param orderId
      * @param request
+     * @param userDetails
      * @return
      */
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/orders/{orderId}/reviews")
     public ResponseEntity<?> createReview(@PathVariable UUID orderId,
                                           @Valid @RequestBody CreateReviewRequest request,
-                                          @AuthenticationPrincipal String username) {
+                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        ReviewResponse response = reviewService.createReview(orderId, username, request);
+        ReviewResponse response = reviewService.createReview(orderId, userDetails.getUser(), request);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
      * 리뷰 목록 조회 api
+     * @param request
+     * @param pageable
      * @return
      */
     @GetMapping("/reviews")
@@ -71,20 +74,19 @@ public class ReviewController {
     }
 
     /**
-     * 리부 수정 api
+     * 리뷰 수정 api
      * @param reviewId
      * @param request
-     * @param authentication
+     * @param userDetails
      * @return
      */
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PatchMapping("/reviews/{reviewId}")
     public ResponseEntity<?> updateReview(@PathVariable UUID reviewId,
                                           @Valid @RequestBody UpdateReviewRequest request,
-                                          Authentication authentication) {
+                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        String username = (String) authentication.getPrincipal();
-
-        ReviewResponse response = reviewService.updateReview(reviewId, request, username);
+        ReviewResponse response = reviewService.updateReview(reviewId, request, userDetails.getUser());
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -92,17 +94,17 @@ public class ReviewController {
     /**
      * 리뷰 삭제 api
      * @param reviewId
-     * @param authentication
+     * @param userDetails
      * @return
      */
     @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId,
-                                          Authentication authentication) {
+                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        String username = (String) authentication.getPrincipal();
-        String role = authentication.getAuthorities().iterator().next().getAuthority();
-
-        reviewService.deleteReview(reviewId, username, role);
+        reviewService.deleteReview(
+                reviewId,
+                userDetails.getUser(),
+                userDetails.getAuthorities().iterator().next().getAuthority());
 
         return ResponseEntity.ok(ApiResponse.success());
     }

@@ -27,8 +27,8 @@ public class ReviewResponse {
     public static ReviewResponse from(Review review) {
         return ReviewResponse.builder()
                 .reviewId(review.getId())
-                .orderId(review.getOrderId())
-                .storeId(review.getStoreId())
+                .orderId(review.getOrder().getId())
+                .storeId(review.getStore().getId())
                 .username(review.getUser().getUsername())
                 .rating(review.getRating())
                 .content(review.getContent())
