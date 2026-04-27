@@ -71,6 +71,13 @@ public class AreaService {
         return AreaResponseDTO.from(area);
     }
 
+    // 헬퍼 메서드: 유효한(삭제되지 않고 활성화된) 운영 지역 조회
+    @Transactional(readOnly = true)
+    public Area findActiveAreaById(UUID areaId) {
+        return areaRepository.findByIdAndIsActiveTrueAndDeletedAtIsNull(areaId)
+                .orElseThrow(() -> new CustomException(ErrorCode.AREA_NOT_FOUND));
+    }
+
     // 헬퍼 메서드: 삭제되지 않은 데이터 조회
     private Area findAreaById(UUID areaId) {
         return areaRepository.findByIdAndDeletedAtIsNull(areaId)

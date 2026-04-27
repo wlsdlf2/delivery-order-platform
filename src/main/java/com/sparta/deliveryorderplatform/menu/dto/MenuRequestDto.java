@@ -1,9 +1,6 @@
 package com.sparta.deliveryorderplatform.menu.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 
 @Getter
@@ -17,5 +14,8 @@ public class MenuRequestDto {
     Integer price;
     String description;
 
-//    TODO sunny - ai 파라미터 추가 필요
+    // ai
+    Boolean aiDescription;
+    @Size(max = 100, message = "프롬포트는 100자 이하여야 합니다.")
+    String aiPrompt;
 }

@@ -121,6 +121,20 @@ class AuthServiceTest {
 	}
 
 	@Test
+	@DisplayName("로그인 실패 - 소프트 삭제된 사용자는 LOGIN_FAILED 예외 발생")
+	void login_deletedUser_throwsLoginFailed() {
+		LoginRequestDto request = new LoginRequestDto("user1234", "Password1!");
+		User user = User.createUser("user1234", "닉네임", "test@example.com", "encodedPassword", UserRole.CUSTOMER);
+		user.softDelete("admin");
+
+		given(userRepository.findById("user1234")).willReturn(Optional.of(user));
+
+		assertThatThrownBy(() -> authService.login(request))
+			.isInstanceOf(CustomException.class)
+			.extracting("errorCode").isEqualTo(ErrorCode.LOGIN_FAILED);
+	}
+
+	@Test
 	@DisplayName("로그인 실패 - 존재하지 않는 아이디 시 LOGIN_FAILED 예외 발생")
 	void login_userNotFound_throwsLoginFailed() {
 		LoginRequestDto request = new LoginRequestDto("nouser1", "Password1!");

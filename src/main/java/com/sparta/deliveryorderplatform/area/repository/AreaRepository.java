@@ -10,4 +10,6 @@ public interface AreaRepository extends JpaRepository<Area, UUID>, AreaRepositor
     boolean existsByNameAndDeletedAtIsNull(String name);
 
     Optional<Area> findByIdAndDeletedAtIsNull(UUID id);
+
+    Optional<Area> findByIdAndIsActiveTrueAndDeletedAtIsNull(UUID id);
 }

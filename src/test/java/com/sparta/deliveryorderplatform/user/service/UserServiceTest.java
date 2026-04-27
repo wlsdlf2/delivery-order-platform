@@ -55,7 +55,7 @@ class UserServiceTest {
 		given(userRepository.searchUsers(any(), any())).willReturn(new PageImpl<>(List.of(user)));
 
 		Page<UserResponseDto> result = userService.getUsers(
-			new UserSearchCondition(null, null, null),
+			new UserSearchCondition(null, null),
 			PageRequest.of(0, 10)
 		);
 
