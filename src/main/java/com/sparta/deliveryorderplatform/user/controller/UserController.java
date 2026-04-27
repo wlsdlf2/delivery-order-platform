@@ -1,11 +1,15 @@
 package com.sparta.deliveryorderplatform.user.controller;
 
+import java.util.Set;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +36,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
 
+	private static final Set<Integer> ALLOWED_PAGE_SIZES = Set.of(10, 30, 50);
+
 	private final UserService userService;
 
 	// 사용자 목록 조회 (MASTER만 가능)
@@ -41,7 +47,10 @@ public class UserController {
 		UserSearchCondition condition,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		return ResponseEntity.ok(ApiResponse.success(PageResponse.of(userService.getUsers(condition, pageable))));
+		Pageable validated = ALLOWED_PAGE_SIZES.contains(pageable.getPageSize())
+			? pageable
+			: PageRequest.of(pageable.getPageNumber(), 10, pageable.getSort());
+		return ResponseEntity.ok(ApiResponse.success(PageResponse.of(userService.getUsers(condition, validated))));
 	}
 
 	// 사용자 상세 조회
@@ -64,7 +73,7 @@ public class UserController {
 	}
 
 	// 사용자 삭제
-	@PatchMapping("/{username}")
+	@DeleteMapping("/{username}")
 	public ResponseEntity<ApiResponse<Void>> deleteUser(
 		@PathVariable String username,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
