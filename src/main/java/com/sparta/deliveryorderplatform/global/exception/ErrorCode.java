@@ -65,6 +65,10 @@ public enum ErrorCode {
 	CANCLE_TIME_OUT(400, "CANCLE_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
   EXIST_ACTIVE_ORDERS(409, "EXIST_ACTIVE_ORDERS", "진행 중인 주문이 있어 처리할 수 없습니다."),
 
+	//Order
+	ORDER_NOT_FOUND(404,"ORDER_NOT_FOUND","주문을 찾을 수 없습니다."),
+	CANCEL_TIME_OUT(400, "CANCEL_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
+
 	// jwt
 	INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
 	EXPIRED_TOKEN(401, "EXPIRED_TOKEN", "만료된 토큰입니다."),
