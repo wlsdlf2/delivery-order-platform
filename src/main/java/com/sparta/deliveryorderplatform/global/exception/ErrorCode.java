@@ -23,6 +23,10 @@ public enum ErrorCode {
 	// menu
 	MENU_NOT_FOUND(404, "MENU_NOT_FOUND", "해당 상품이 존재하지 않습니다."),
 
+	//ai
+	AI_REQUEST_FAIL(500, "AI_REQUEST_FAIL", "AI 서비스의 요청이 실패했습니다."),
+	AI_RESPONSE_NULL(500, "AI_RESPONSE_NULL", "AI 서비스 응답이 null입니다."),
+
 	// category
   	DUPLICATE_CATEGORY_NAME(400, "DUPLICATE_CATEGORY_NAME", "이미 존재하는 카테고리명입니다."),
   	CATEGORY_NOT_FOUND(404, "CATEGORY_NOT_FOUND", "존재하지 않거나 삭제된 카테고리입니다."),
@@ -39,16 +43,37 @@ public enum ErrorCode {
 	PAYMENT_NOT_FOUND(404, "PAYMENT_NOT_FOUND", "결제 정보를 찾을 수 없습니다."),
 	ALREADY_CANCELLED(400, "ALREADY_CANCELLED", "이미 취소된 결제입니다."),
 	INVALID_PAYMENT_STATUS(400, "INVALID_PAYMENT_STATUS", "유효하지 않은 결제 상태 변경입니다."),
+	PAYMENT_USER_MISMATCH(403, "PAYMENT_USER_MISMATCH", "주문자와 결제 요청자가 일치하지 않습니다."),
+	PAYMENT_AMOUNT_MISMATCH(400, "PAYMENT_AMOUNT_MISMATCH", "결제 금액이 주문 금액과 일치하지 않습니다."),
+	PAYMENT_ALREADY_EXISTS(409, "PAYMENT_ALREADY_EXISTS", "이미 결제가 완료된 주문입니다."),
 
 	// review
 	REVIEW_NOT_FOUND(404, "REVIEW_NOT_FOUND", "리뷰를 찾을 수 없습니다."),
+	INVALID_RATING(400, "INVALID_RATING", "평점은 1~5 사이여야 합니다."),
+	REVIEW_ALREADY_EXISTS(409, "REVIEW_ALREADY_EXISTS", "이미 해당 주문에 대한 리뷰가 존재합니다."),
+	REVIEW_ORDER_NOT_COMPLETED(400, "REVIEW_ORDER_NOT_COMPLETED", "완료된 주문에만 리뷰를 작성할 수 있습니다."),
+	REVIEW_UNAUTHORIZED(403, "REVIEW_UNAUTHORIZED", "본인의 주문에만 리뷰를 작성할 수 있습니다."),
+	REVIEW_DELETE_FORBIDDEN(403, "REVIEW_DELETE_FORBIDDEN", "리뷰 삭제 권한이 없습니다."),
+	REVIEW_UPDATE_FORBIDDEN(403, "REVIEW_UPDATE_FORBIDDEN", "본인의 리뷰만 수정할 수 있습니다."),
+
+	//Order
+	ORDER_NOT_FOUND(404,"ORDER_NOT_FOUND","주문을 찾을 수 없습니다."),
+	CANCLE_TIME_OUT(400, "CANCLE_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
+
+	//Order
+	ORDER_NOT_FOUND(404,"ORDER_NOT_FOUND","주문을 찾을 수 없습니다."),
+	CANCLE_TIME_OUT(400, "CANCLE_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
+  EXIST_ACTIVE_ORDERS(409, "EXIST_ACTIVE_ORDERS", "진행 중인 주문이 있어 처리할 수 없습니다."),
 
 	// jwt
 	INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
 	EXPIRED_TOKEN(401, "EXPIRED_TOKEN", "만료된 토큰입니다."),
 	UNSUPPORTED_TOKEN(401, "UNSUPPORTED_TOKEN", "지원되지 않는 토큰입니다."),
 	WRONG_TOKEN(401, "WRONG_TOKEN", "잘못된 토큰 서명입니다."),
-	TOKEN_NOT_FOUND(401, "TOKEN_NOT_FOUND", "토큰을 찾을 수 없습니다.");
+	TOKEN_NOT_FOUND(401, "TOKEN_NOT_FOUND", "토큰을 찾을 수 없습니다."),
+
+	ADDRESS_NOT_FOUND(401, "ADDRESS_NOT_FOUND", "배송지를 찾을 수 없습니다.");
+
 
 	private final int status;
 	private final String code;

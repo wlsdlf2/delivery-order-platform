@@ -1,25 +1,12 @@
 package com.sparta.deliveryorderplatform.auth.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sparta.deliveryorderplatform.auth.dto.LoginRequestDto;
-import com.sparta.deliveryorderplatform.auth.dto.LoginResponseDto;
-import com.sparta.deliveryorderplatform.auth.dto.SignUpRequestDto;
-import com.sparta.deliveryorderplatform.auth.jwt.JwtAuthenticationEntryPoint;
-import com.sparta.deliveryorderplatform.auth.jwt.JwtTokenProvider;
-import com.sparta.deliveryorderplatform.auth.service.AuthService;
-import com.sparta.deliveryorderplatform.global.exception.CustomException;
-import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
-import com.sparta.deliveryorderplatform.user.entity.UserRole;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +19,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sparta.deliveryorderplatform.auth.dto.LoginRequestDto;
+import com.sparta.deliveryorderplatform.auth.dto.LoginResponseDto;
+import com.sparta.deliveryorderplatform.auth.dto.SignUpRequestDto;
+import com.sparta.deliveryorderplatform.auth.jwt.JwtAuthenticationEntryPoint;
+import com.sparta.deliveryorderplatform.auth.jwt.JwtTokenProvider;
+import com.sparta.deliveryorderplatform.auth.service.AuthService;
 import com.sparta.deliveryorderplatform.global.config.SecurityConfig;
+import com.sparta.deliveryorderplatform.global.exception.CustomException;
+import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.user.entity.UserRole;
 
 @WebMvcTest(AuthController.class)
 @Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class})
@@ -146,7 +143,8 @@ class AuthControllerTest {
 	@DisplayName("로그인 성공 - 200과 액세스·리프레시 토큰을 반환한다")
 	void login_success_returns200WithTokens() throws Exception {
 		LoginRequestDto request = new LoginRequestDto("user1234", "Password1!");
-		given(authService.login(any())).willReturn(LoginResponseDto.of("accessToken", "refreshToken"));
+		UserRole role = UserRole.CUSTOMER;
+		given(authService.login(any())).willReturn(LoginResponseDto.of("accessToken", "refreshToken", request.username(), role));
 
 		mockMvc.perform(post("/api/v1/auth/signup/login")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -154,7 +152,9 @@ class AuthControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("SUCCESS"))
 			.andExpect(jsonPath("$.data.accessToken").value("accessToken"))
-			.andExpect(jsonPath("$.data.refreshToken").value("refreshToken"));
+			.andExpect(jsonPath("$.data.refreshToken").value("refreshToken"))
+			.andExpect(jsonPath("$.data.username").value("user1234"))
+			.andExpect(jsonPath("$.data.role").value(role.name()));
 	}
 
 	@Test

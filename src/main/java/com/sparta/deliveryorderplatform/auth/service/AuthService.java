@@ -62,6 +62,11 @@ public class AuthService {
 		User user = userRepository.findById(requestDto.username())
 			.orElseThrow(() -> new CustomException(ErrorCode.LOGIN_FAILED));
 
+		// 삭제된 사용자 확인
+		if (user.getDeletedAt() != null) {
+			throw new CustomException(ErrorCode.LOGIN_FAILED);
+		}
+
 		// 비밀번호 확인
 		if (!passwordEncoder.matches(requestDto.password(), user.getPassword())) {
 			throw new CustomException(ErrorCode.LOGIN_FAILED);
@@ -71,7 +76,7 @@ public class AuthService {
 		String accessToken = jwtTokenProvider.createAccessToken(user.getUsername(), user.getRole());
 		String refreshToken = jwtTokenProvider.createRefreshToken(user.getUsername());
 
-		return LoginResponseDto.of(accessToken, refreshToken);
+		return LoginResponseDto.of(accessToken, refreshToken, user.getUsername(), user.getRole());
 	}
 
 	@Transactional
