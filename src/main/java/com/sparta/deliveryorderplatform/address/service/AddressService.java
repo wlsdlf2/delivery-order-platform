@@ -102,6 +102,8 @@ public class AddressService {
 
 		checkPermission(address, user);
 
+		if (address.isDefault()) return;
+
 		disableDefaultAddress(user);
 
 		address.markAsDefault();
@@ -123,7 +125,7 @@ public class AddressService {
 	}
 
 	private void disableDefaultAddress(User user) {
-		addressRepository.findByUserAndIsDefaultTrue(user)
+		addressRepository.findByUserAndIsDefaultTrueAndDeletedAtIsNull(user)
 			.ifPresent(Address::unmarkAsDefault);
 	}
 }

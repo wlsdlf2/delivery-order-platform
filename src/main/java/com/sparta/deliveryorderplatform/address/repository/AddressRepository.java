@@ -13,5 +13,5 @@ import com.sparta.deliveryorderplatform.user.entity.User;
 public interface AddressRepository extends JpaRepository<Address, UUID> {
 	Page<Address> findByUserAndDeletedAtIsNull(User user, Pageable pageable);
 	Page<Address> findAll(Pageable pageable);
-	Optional<Address> findByUserAndIsDefaultTrue (User user);
+	Optional<Address> findByUserAndIsDefaultTrueAndDeletedAtIsNull (User user);
 }
