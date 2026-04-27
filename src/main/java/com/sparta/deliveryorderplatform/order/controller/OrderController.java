@@ -79,7 +79,7 @@ public class OrderController {
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<ApiResponse<Void>> cancelOrder(@PathVariable UUID orderId,
         @AuthenticationPrincipal UserDetailsImpl impl) {
-        orderService.cancleOrder(orderId, impl.getUsername(), impl.getUser().getRole());
+        orderService.cancelOrder(orderId, impl.getUsername(), impl.getUser().getRole());
         return ResponseEntity.ok(ApiResponse.success());
     }
 
