@@ -59,7 +59,7 @@ public class AreaController {
     }
 
     // delete
-    @PatchMapping("/{areaId}")
+    @DeleteMapping("/{areaId}")
     @PreAuthorize("hasAnyRole('MASTER')")
     public ResponseEntity<ApiResponse<AreaResponseDTO>> deleteArea(
         @PathVariable UUID areaId,

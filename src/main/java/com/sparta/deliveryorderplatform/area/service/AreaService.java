@@ -7,6 +7,8 @@ import com.sparta.deliveryorderplatform.area.entity.Area;
 import com.sparta.deliveryorderplatform.area.repository.AreaRepository;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.store.repository.StoreRepository;
+import com.sparta.deliveryorderplatform.user.entity.User;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class AreaService {
 
     private final AreaRepository areaRepository;
+    private final StoreRepository storeRepository;
 
     // create
     @Transactional
@@ -59,16 +62,24 @@ public class AreaService {
             validateDuplicateName(requestDTO.getName());
         }
 
+        // 활성 -> 비활성으로 변경될 때만 연관된 가게가 있는지 확인: deletedAt만 판단
+        if (area.getIsActive() && Boolean.FALSE.equals(requestDTO.getIsActive())) {
+            validateNoActiveStores(areaId);
+        }
+
         area.update(requestDTO.getName(), requestDTO.getCity(), requestDTO.getDistrict(), requestDTO.getIsActive());
         return AreaResponseDTO.from(area);
     }
 
     // delete
-    // todo store 기능 구현 시, 연관관계가 있는 경우 삭제되지 않도록 수정 필요
     @Transactional
-    public AreaResponseDTO deleteArea(UUID areaId, String username) {
+    public AreaResponseDTO deleteArea(UUID areaId, User user) {
         Area area = findAreaById(areaId);
-        area.delete(username);
+
+        // 삭제 전 연관된 가게가 있는지 확인: deletedAt만 판단
+        validateNoActiveStores(areaId);
+
+        area.delete(user.getUsername());
         return AreaResponseDTO.from(area);
     }
 
@@ -89,6 +100,12 @@ public class AreaService {
     private void validateDuplicateName(String name) {
         if (areaRepository.existsByNameAndDeletedAtIsNull(name)) {
             throw new CustomException(ErrorCode.DUPLICATE_AREA_NAME);
+        }
+    }
+
+    private void validateNoActiveStores(UUID areaId) {
+        if (storeRepository.existsByAreaIdAndDeletedAtIsNull(areaId)) {
+            throw new CustomException(ErrorCode.EXIST_LINKED_STORES);
         }
     }
 }
