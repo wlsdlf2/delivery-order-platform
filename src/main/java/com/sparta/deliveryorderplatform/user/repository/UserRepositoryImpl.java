@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -29,12 +30,11 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 		List<User> content = queryFactory
 			.selectFrom(user)
 			.where(
-				usernameEq(condition.username()),
-				nicknameContains(condition.nickname()),
+				keywordSearch(condition.keyword()),
 				roleEq(condition.role()),
-				user.deletedAt.isNull() // 소프트 삭제 제외
+				user.deletedAt.isNull()
 			)
-			.orderBy(user.createdAt.desc()) // 기본 정렬 (필요시 Pageable의 sort 적용 가능)
+			.orderBy(orderSpecifiers(pageable))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
 			.fetch();
@@ -44,27 +44,42 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 			.select(user.count())
 			.from(user)
 			.where(
-				usernameEq(condition.username()),
-				nicknameContains(condition.nickname()),
+				keywordSearch(condition.keyword()),
 				roleEq(condition.role()),
 				user.deletedAt.isNull()
 			);
 
-		// 3. Page 객체 반환 (PageableExecutionUtils 사용 시 카운트 쿼리 최적화 가능)
 		return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
 	}
 
 	// --- 동적 조건 메서드 (BooleanExpression) ---
 
-	private BooleanExpression usernameEq(String username) {
-		return hasText(username) ? user.username.eq(username) : null;
-	}
-
-	private BooleanExpression nicknameContains(String nickname) {
-		return hasText(nickname) ? user.nickname.contains(nickname) : null;
+	private BooleanExpression keywordSearch(String keyword) {
+		if (!hasText(keyword)) return null;
+		return user.username.eq(keyword).or(user.nickname.contains(keyword));
 	}
 
 	private BooleanExpression roleEq(UserRole role) {
 		return role != null ? user.role.eq(role) : null;
+	}
+
+	// --- 정렬 ---
+
+	@SuppressWarnings("rawtypes")
+	private OrderSpecifier[] orderSpecifiers(Pageable pageable) {
+		if (!pageable.getSort().isSorted()) {
+			return new OrderSpecifier[]{user.createdAt.desc()};
+		}
+		return pageable.getSort().stream()
+			.map(order -> {
+				boolean asc = order.isAscending();
+				return switch (order.getProperty()) {
+					case "username" -> asc ? user.username.asc() : user.username.desc();
+					case "nickname" -> asc ? user.nickname.asc() : user.nickname.desc();
+					case "updatedAt" -> asc ? user.updatedAt.asc() : user.updatedAt.desc();
+					default -> asc ? user.createdAt.asc() : user.createdAt.desc();
+				};
+			})
+			.toArray(OrderSpecifier[]::new);
 	}
 }

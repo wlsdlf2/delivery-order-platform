@@ -95,6 +95,28 @@ class UserControllerTest {
 			.andExpect(status().isForbidden());
 	}
 
+	@Test
+	@DisplayName("사용자 목록 조회 성공 - keyword 파라미터로 조회하면 200을 반환한다")
+	void getUsers_withKeyword_returns200() throws Exception {
+		given(userService.getUsers(any(), any())).willReturn(Page.empty());
+
+		mockMvc.perform(get("/api/v1/users")
+				.param("keyword", "홍길동")
+				.with(authentication(masterAuth())))
+			.andExpect(status().isOk());
+	}
+
+	@Test
+	@DisplayName("사용자 목록 조회 성공 - 허용되지 않는 size는 10으로 보정되어 200을 반환한다")
+	void getUsers_invalidSize_correctedTo10() throws Exception {
+		given(userService.getUsers(any(), any())).willReturn(Page.empty());
+
+		mockMvc.perform(get("/api/v1/users")
+				.param("size", "7")
+				.with(authentication(masterAuth())))
+			.andExpect(status().isOk());
+	}
+
 	// ─── GET /api/v1/users/{username} ────────────────────────────────────────
 
 	@Test
