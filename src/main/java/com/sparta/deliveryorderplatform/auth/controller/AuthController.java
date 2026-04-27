@@ -3,6 +3,7 @@ package com.sparta.deliveryorderplatform.auth.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,9 +41,9 @@ public class AuthController {
 
 	@PostMapping("/logout")
 	public ResponseEntity<ApiResponse<Void>> logout(
-		@AuthenticationPrincipal String username // TODO: 추후 로그인 사용자로 교체
+		@AuthenticationPrincipal UserDetails userDetails
 	) {
-		authService.logout(username);
+		authService.logout(userDetails.getUsername());
 		return ResponseEntity.ok(ApiResponse.success());
 	}
 }

@@ -56,7 +56,7 @@ public class CustomReviewRepositoryImpl implements CustomReviewRepository {
     private BooleanExpression equalStoreId(UUID storeId) {
         if (storeId == null)
             return null;
-        return QReview.review.storeId.eq(storeId);
+        return QReview.review.store.id.eq(storeId);
     }
 
     private BooleanExpression equalRating(Integer rating) {

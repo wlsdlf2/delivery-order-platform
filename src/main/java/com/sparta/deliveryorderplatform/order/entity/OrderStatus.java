@@ -1,7 +1,7 @@
 package com.sparta.deliveryorderplatform.order.entity;
 
 public enum OrderStatus {
-    CANCLE, PENDING, ACCEPTED, COOKING, DELIVERING, DELIVERED, COMPLETED;
+    CANCEL, PENDING, ACCEPTED, COOKING, DELIVERING, DELIVERED, COMPLETED;
 
     // OWNER가 변경 가능한 다음 상태를 반환하는 메서드
     public OrderStatus getNextStatus() {
