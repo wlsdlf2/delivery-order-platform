@@ -1,5 +1,6 @@
 package com.sparta.deliveryorderplatform.menu.service;
 
+import com.sparta.deliveryorderplatform.ai.client.AiClient;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import com.sparta.deliveryorderplatform.menu.dto.MenuRequestDto;
@@ -8,8 +9,8 @@ import com.sparta.deliveryorderplatform.menu.entity.Menu;
 import com.sparta.deliveryorderplatform.menu.repository.MenuRepository;
 import com.sparta.deliveryorderplatform.store.entity.Store;
 import com.sparta.deliveryorderplatform.store.repository.StoreRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,15 +28,24 @@ public class MenuService {
 
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
+    private final AiClient aiClient;
 
     @Transactional
-    public void createMenu(MenuRequestDto menuRequestDto, UUID storeId, Authentication authentication, HttpServletRequest request) {
+    public void createMenu(MenuRequestDto menuRequestDto, UUID storeId, Authentication authentication, String token) {
         String role = authentication.getAuthorities().iterator().next().getAuthority();
         if (role.equals("ROLE_CUSTOMER")) throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
 
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
+        String description;
         Menu menu = new Menu(menuRequestDto, store);
+
+        //ai 사용시 내부 client를 통해 HTTP 호출
+        if (menuRequestDto.getAiDescription()) {
+            description = aiClient.generateDescription(menuRequestDto.getAiPrompt(), token);
+            menu.setDescription(description);
+        }
+
         menuRepository.save(menu);
     }
 
