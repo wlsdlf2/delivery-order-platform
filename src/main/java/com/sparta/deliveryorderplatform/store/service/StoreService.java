@@ -7,8 +7,7 @@ import com.sparta.deliveryorderplatform.category.service.CategoryService;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import com.sparta.deliveryorderplatform.menu.repository.MenuRepository;
-import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
-import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
+import com.sparta.deliveryorderplatform.order.service.OrderService;
 import com.sparta.deliveryorderplatform.store.dto.StoreRequestDTO;
 import com.sparta.deliveryorderplatform.store.dto.StoreResponseDTO;
 import com.sparta.deliveryorderplatform.store.dto.StoreSearchDTO;
@@ -22,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -31,7 +31,7 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final CategoryService categoryService;
     private final AreaService areaService;
-    private final OrderRepository orderRepository;
+    private final OrderService orderService;
     private final MenuRepository menuRepository;
 
     @Transactional
@@ -108,15 +108,14 @@ public class StoreService {
         Store store = findStoreById(storeId);
         validateStoreAccess(user, store);
 
-//        // todo 가게 메뉴 전체 isHidden 업데이트 처리 -> menuRepository
-//        if (Boolean.TRUE.equals(store.getIsHidden())) {
-//            // 숨김 -> 진행 중인 주문 여부 확인 -> 메뉴 전체 숨김
-//            validateNoActiveOrders(storeId);
-//            menuRepository.UPDATE_IS_HIDDEN_ALL_BY_STORE_ID(storeId, true);
-//        } else {
-//            // 노출 -> 메뉴 전체 노출
-//            menuRepository.UPDATE_IS_HIDDEN_ALL_BY_STORE_ID(storeId, false);
-//        }
+        if (Boolean.TRUE.equals(isHidden)) {
+            // 숨김 -> 진행 중인 주문 여부 확인 -> 메뉴 전체 숨김
+            validateNoActiveOrders(storeId);
+            menuRepository.updateIsHiddenByStoreId(storeId, true);
+        } else {
+            // 노출 -> 메뉴 전체 노출
+            menuRepository.updateIsHiddenByStoreId(storeId, false);
+        }
 
         store.updateVisibility(isHidden);
         return StoreResponseDTO.from(store);
@@ -129,8 +128,7 @@ public class StoreService {
 
         validateNoActiveOrders(storeId);
 
-//        // todo 가게 메뉴 전체 soft delete(숨김+삭제)
-//        menuRepository.SOFT_DELETED_ALL_BY_STORE_ID(storeId, user.getUsername());
+        menuRepository.softDelete(storeId, LocalDateTime.now(), user.getUsername());
 
         // 가게 삭제
         store.delete(user.getUsername());
@@ -154,10 +152,10 @@ public class StoreService {
         }
     }
 
-    // todo 진행중인 주문이 있는지 확인 -> orderRepository
+    // 진행중인 주문이 있는지 확인
     private void validateNoActiveOrders(UUID storeId) {
-//        if (orderRepository.EXISTS....(storeId, OrderStatus.COMPLETED)) {
-//            throw new CustomException(ErrorCode.EXIST_ACTIVE_ORDERS);
-//        }
+        if (orderService.storeInOrderIsCompleted(storeId)) {
+            throw new CustomException(ErrorCode.EXIST_ACTIVE_ORDERS);
+        }
     }
 }
