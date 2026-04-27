@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,17 +33,21 @@ public class MenuService {
     private final AiClient aiClient;
 
     @Transactional
-    public void createMenu(MenuRequestDto menuRequestDto, UUID storeId, Authentication authentication, String token) {
-        String role = authentication.getAuthorities().iterator().next().getAuthority();
+    public void createMenu(MenuRequestDto menuRequestDto, UUID storeId, UserDetailsImpl userDetails, String token) {
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
         if (role.equals("ROLE_CUSTOMER")) throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
 
-        Store store = storeRepository.findById(storeId).orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+        //삭제 되지 않은 store 만 검색
+        Store store = storeRepository.findByIdAndDeletedAtIsNull(storeId).orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+        //본인 가게 인지 check
+        if (role.equals("ROLE_OWNER") && !store.getOwner().getUsername().equals(userDetails.getUsername()))
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
 
         String description;
         Menu menu = new Menu(menuRequestDto, store);
 
         //ai 사용시 내부 client를 통해 HTTP 호출
-        if (menuRequestDto.getAiDescription()) {
+        if (menuRequestDto.getAiDescription() != null) {
             description = aiClient.generateDescription(menuRequestDto.getAiPrompt(), token);
             menu.setDescription(description);
         }

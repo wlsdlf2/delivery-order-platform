@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,13 +30,13 @@ public class MenuController {
     @PostMapping("/stores/{storeId}/menus")
     public ResponseEntity<?> createMenu(@PathVariable UUID storeId,
                                         @Valid @RequestBody MenuRequestDto requestDto,
-                                        Authentication authentication,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails,
                                         @RequestHeader("Authorization") String authHeader) {
 
         //내부 client 호출을 위한 토큰 전달
         String token = authHeader.substring(7);
 
-        menuService.createMenu(requestDto, storeId, authentication, token);
+        menuService.createMenu(requestDto, storeId, userDetails, token);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
