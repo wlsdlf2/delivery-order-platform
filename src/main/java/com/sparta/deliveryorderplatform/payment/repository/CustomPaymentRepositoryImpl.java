@@ -2,9 +2,12 @@ package com.sparta.deliveryorderplatform.payment.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sparta.deliveryorderplatform.order.entity.QOrder;
 import com.sparta.deliveryorderplatform.payment.entity.Payment;
 import com.sparta.deliveryorderplatform.payment.entity.QPayment;
+import com.sparta.deliveryorderplatform.store.entity.QStore;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,11 +15,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static com.querydsl.core.types.Order.DESC;
 
 
 @RequiredArgsConstructor
@@ -28,48 +28,82 @@ public class CustomPaymentRepositoryImpl implements CustomPaymentRepository{
     public Page<Payment> findPaymentList(String username, String role, Pageable pageable) {
 
         QPayment payment = QPayment.payment;
+        QOrder order = QOrder.order;
+        QStore store = QStore.store;
 
-        int page = pageable.getPageNumber();
-        int size = pageable.getPageSize();
-        Sort sort = pageable.getSort();
+        // 공통 쿼리 뼈대
+        JPAQuery<Payment> query = jpaQueryFactory
+                .selectFrom(payment);
 
-        List<Payment> content = jpaQueryFactory
-                .selectFrom(payment)
-                .where(roleCondition(username, role))
-                .offset((long) page * size)
-                .limit(size)
-                .orderBy(getSortCondition(sort))
+        // role별로 필요한 조인만 추가
+        if (isOwner(role)) {
+            query.join(payment.order, order)
+                    .join(order.store, store);
+        }
+
+        // where 조건
+        BooleanBuilder roleCondition = roleCondition(username, role, payment, store);
+
+        List<Payment> content = query
+                .where(roleCondition)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(getSortCondition(pageable.getSort()))
                 .fetch();
 
-        Long total = Optional.ofNullable(jpaQueryFactory
+        // count 쿼리
+        var countQuery = jpaQueryFactory
                 .select(payment.count())
-                .from(payment)
-                .where(roleCondition(username, role))
-                .fetchOne()).orElse(0L);
+                .from(payment);
+
+        if (isOwner(role)) {
+            countQuery.join(payment.order, order)
+                    .join(order.store, store);
+        }
+
+        Long total = Optional.ofNullable(
+                countQuery.where(roleCondition).fetchOne()
+        ).orElse(0L);
 
         return new PageImpl<>(content, pageable, total);
     }
 
     private OrderSpecifier[] getSortCondition(final Sort sort) {
-        final List<OrderSpecifier> orders = new ArrayList<>();
 
-        return new OrderSpecifier[]{new OrderSpecifier(DESC, QPayment.payment.createdAt)};
+        // Sort 객체에서 첫 번째 정렬 조건 꺼냄. 없으면 기본값 createdAt,DESC
+        Sort.Order sortOrder = sort.stream().findFirst()
+                .orElse(Sort.Order.desc("createdAt"));
+
+        // QueryDSL의 Order로 변환
+        com.querydsl.core.types.Order direction = sortOrder.isAscending() ?
+                com.querydsl.core.types.Order.ASC :
+                com.querydsl.core.types.Order.DESC;
+
+        return new OrderSpecifier[]{new OrderSpecifier(direction, QPayment.payment.createdAt)};
     }
 
-    private BooleanBuilder roleCondition(String username, String role) {
+    private BooleanBuilder roleCondition(String username, String role,
+                                         QPayment payment, QStore store) {
         BooleanBuilder builder = new BooleanBuilder();
 
         builder.and(QPayment.payment.deletedAt.isNull());
 
-        if (role.equals(UserRole.CUSTOMER.getAuthority())) {
-            builder.and(QPayment.payment.user.username.eq(username));
+        if (isCustomer(role)) {
+            builder.and(payment.user.username.eq(username));
         }
 
-        // todo : 본인 가게 결제 내역도 조회 가능하도록 수정 필요 (Store 연관관계 완성 후)
-        if (role.equals(UserRole.OWNER.getAuthority())) {
-            builder.and(QPayment.payment.user.username.eq(username));
+        if (isOwner(role)) {
+            builder.and(store.owner.username.eq(username));
         }
 
         return builder;
+    }
+
+    private boolean isCustomer(String role) {
+        return UserRole.CUSTOMER.getAuthority().equals(role);
+    }
+
+    private boolean isOwner(String role) {
+        return UserRole.OWNER.getAuthority().equals(role);
     }
 }

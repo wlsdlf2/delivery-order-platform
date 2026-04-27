@@ -32,6 +32,7 @@ public class PaymentController {
      * @param userDetails
      * @return
      */
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/orders/{orderId}/payments")
     public ResponseEntity<?> createPayment(@PathVariable UUID orderId,
                                            @Valid @RequestBody CreatePaymentRequest request,
