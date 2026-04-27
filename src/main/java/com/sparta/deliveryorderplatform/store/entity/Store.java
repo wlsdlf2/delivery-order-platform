@@ -87,6 +87,12 @@ public class Store extends BaseAuditEntity {
         }
     }
 
+    public void updateAverageRating(Double newAvg) {
+        // null이면 0.0으로, 아니면 반올림 계산
+        double value = (newAvg == null) ? 0.0 : newAvg;
+        this.averageRating = Math.round(value * 10) / 10.0;
+    }
+
     public void delete(String username) {
         super.softDelete(username);
         this.isHidden = true;   // 가게 삭제 시 숨김 처리
