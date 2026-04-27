@@ -1,5 +1,7 @@
 package com.sparta.deliveryorderplatform.order.service;
 
+import com.sparta.deliveryorderplatform.address.entity.Address;
+import com.sparta.deliveryorderplatform.address.repository.AddressRepository;
 import com.sparta.deliveryorderplatform.global.common.PageResponse;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
@@ -11,12 +13,9 @@ import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderSearch;
 import com.sparta.deliveryorderplatform.order.entity.Order;
 import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
-import com.sparta.deliveryorderplatform.order.entity.OrderType;
-import com.sparta.deliveryorderplatform.order.prac.Address;
-import com.sparta.deliveryorderplatform.order.prac.AddressRepository;
-import com.sparta.deliveryorderplatform.order.prac.StoreRepository;
 import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
 import com.sparta.deliveryorderplatform.store.entity.Store;
+import com.sparta.deliveryorderplatform.store.repository.StoreRepository;
 import com.sparta.deliveryorderplatform.user.entity.User;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import com.sparta.deliveryorderplatform.user.repository.UserRepository;
@@ -29,7 +28,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
