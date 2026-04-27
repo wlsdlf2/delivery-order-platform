@@ -7,6 +7,7 @@ import com.sparta.deliveryorderplatform.category.entity.Category;
 import com.sparta.deliveryorderplatform.category.repository.CategoryRepository;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.store.repository.StoreRepository;
 import com.sparta.deliveryorderplatform.user.entity.User;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
+    private final StoreRepository storeRepository;
 
     //Create
     @Transactional
@@ -80,6 +82,11 @@ public class CategoryService {
     @Transactional
     public CategoryResponseDTO deleteCategory(UUID categoryId, User user) {
         Category category = findCategoryById(categoryId);
+
+        // 삭제 전 연관된 가게가 있는지 확인: deletedAt만 판단
+        if (storeRepository.existsByCategoryIdAndDeletedAtIsNull(categoryId)) {
+            throw new CustomException(ErrorCode.EXIST_LINKED_STORES);
+        }
 
         category.delete(user.getUsername());
         return CategoryResponseDTO.from(category);

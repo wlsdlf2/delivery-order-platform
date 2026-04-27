@@ -8,4 +8,7 @@ import java.util.UUID;
 
 public interface StoreRepository extends JpaRepository<Store, UUID>, StoreRepositoryCustom {
     Optional<Store> findByIdAndDeletedAtIsNull(UUID id);
+
+    boolean existsByAreaIdAndDeletedAtIsNull(UUID areaId);
+    boolean existsByCategoryIdAndDeletedAtIsNull(UUID categoryId);
 }

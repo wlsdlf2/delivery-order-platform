@@ -60,7 +60,7 @@ public class CategoryController {
     }
 
     // delete
-    @PatchMapping("/{categoryId}")
+    @DeleteMapping("/{categoryId}")
     @PreAuthorize("hasAnyRole('MASTER')")
     public ResponseEntity<ApiResponse<CategoryResponseDTO>> deleteCategory(
         @PathVariable UUID categoryId,
