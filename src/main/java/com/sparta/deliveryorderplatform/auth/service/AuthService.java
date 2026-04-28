@@ -8,6 +8,7 @@ import com.sparta.deliveryorderplatform.auth.dto.LoginRequestDto;
 import com.sparta.deliveryorderplatform.auth.dto.LoginResponseDto;
 import com.sparta.deliveryorderplatform.auth.dto.SignUpRequestDto;
 import com.sparta.deliveryorderplatform.auth.jwt.JwtTokenProvider;
+import com.sparta.deliveryorderplatform.global.audit.AuditorHolder;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 import com.sparta.deliveryorderplatform.user.entity.User;
@@ -56,7 +57,12 @@ public class AuthService {
 			requestDto.role()
 		);
 
-		userRepository.save(user);
+		try {
+			AuditorHolder.set(requestDto.username());
+			userRepository.save(user);
+		} finally {
+			AuditorHolder.clear();
+		}
 	}
 
 	public LoginResponseDto login(LoginRequestDto requestDto) {
@@ -85,7 +91,7 @@ public class AuthService {
 	public void logout(String username, String accessToken) {
 		if (accessToken != null) {
 			long remainingMillis = jwtTokenProvider.getRemainingValidityMillis(accessToken);
-			tokenBlacklistService.blacklist(accessToken, remainingMillis);
+			tokenBlacklistService.blacklist(accessToken, username, remainingMillis);
 		}
 		refreshTokenService.delete(username);
 		log.info("User logged out: {}", username);
