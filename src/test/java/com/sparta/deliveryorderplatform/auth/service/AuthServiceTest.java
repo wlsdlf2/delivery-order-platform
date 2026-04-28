@@ -34,6 +34,8 @@ class AuthServiceTest {
 	@Mock UserRepository userRepository;
 	@Mock BCryptPasswordEncoder passwordEncoder;
 	@Mock JwtTokenProvider jwtTokenProvider;
+	@Mock TokenBlacklistService tokenBlacklistService;
+	@Mock RefreshTokenService refreshTokenService;
 	@InjectMocks AuthService authService;
 
 	// ─── 회원가입 ────────────────────────────────────────────────────────────
@@ -113,6 +115,7 @@ class AuthServiceTest {
 		given(passwordEncoder.matches("Password1!", "encodedPassword")).willReturn(true);
 		given(jwtTokenProvider.createAccessToken("user1234", UserRole.CUSTOMER)).willReturn("accessToken");
 		given(jwtTokenProvider.createRefreshToken("user1234")).willReturn("refreshToken");
+		given(jwtTokenProvider.getRefreshTokenExpiration()).willReturn(604800000L);
 
 		LoginResponseDto response = authService.login(request);
 
@@ -166,7 +169,10 @@ class AuthServiceTest {
 	@Test
 	@DisplayName("로그아웃 성공 - 예외 없이 처리된다")
 	void logout_success_noException() {
-		assertThatCode(() -> authService.logout("user1234"))
+		given(jwtTokenProvider.getRemainingValidityMillis("accessToken")).willReturn(300000L);
+		assertThatCode(() -> authService.logout("user1234", "accessToken"))
 			.doesNotThrowAnyException();
+		verify(tokenBlacklistService).blacklist("accessToken", 300000L);
+		verify(refreshTokenService).delete("user1234");
 	}
 }

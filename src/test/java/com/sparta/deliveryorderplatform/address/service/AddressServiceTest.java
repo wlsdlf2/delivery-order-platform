@@ -70,7 +70,7 @@ class AddressServiceTest {
 	void createAddress_withDefault_disablesPreviousDefault() {
 		User user = createCustomer("user1234");
 		Address existing = createAddress(user, true);
-		given(addressRepository.findByUserAndIsDefaultTrue(user)).willReturn(Optional.of(existing));
+		given(addressRepository.findByUserAndIsDefaultTrueAndDeletedAtIsNull(user)).willReturn(Optional.of(existing));
 		Address saved = createAddress(user, true);
 		given(addressRepository.save(any())).willReturn(saved);
 
@@ -87,7 +87,7 @@ class AddressServiceTest {
 	void getAddresses_customer_returnsOwnAddresses() {
 		User user = createCustomer("user1234");
 		Address address = createAddress(user, false);
-		given(addressRepository.findByUser(user, PageRequest.of(0, 10)))
+		given(addressRepository.findByUserAndDeletedAtIsNull(user, PageRequest.of(0, 10)))
 			.willReturn(new PageImpl<>(List.of(address)));
 
 		Page<AddressResponse> result = addressService.getAddresses(user, PageRequest.of(0, 10));
@@ -189,7 +189,7 @@ class AddressServiceTest {
 		Address target = createAddress(user, false);
 		UUID id = UUID.randomUUID();
 		given(addressRepository.findById(id)).willReturn(Optional.of(target));
-		given(addressRepository.findByUserAndIsDefaultTrue(user)).willReturn(Optional.of(existing));
+		given(addressRepository.findByUserAndIsDefaultTrueAndDeletedAtIsNull(user)).willReturn(Optional.of(existing));
 
 		AddressUpdateRequest request = new AddressUpdateRequest("회사", "서울시 종로구", "202호", "03000", true);
 		addressService.updateAddress(id, request, user);
@@ -295,7 +295,7 @@ class AddressServiceTest {
 		Address target = createAddress(user, false);
 		UUID id = UUID.randomUUID();
 		given(addressRepository.findById(id)).willReturn(Optional.of(target));
-		given(addressRepository.findByUserAndIsDefaultTrue(user)).willReturn(Optional.of(prev));
+		given(addressRepository.findByUserAndIsDefaultTrueAndDeletedAtIsNull(user)).willReturn(Optional.of(prev));
 
 		addressService.setDefaultAddress(id, user);
 
