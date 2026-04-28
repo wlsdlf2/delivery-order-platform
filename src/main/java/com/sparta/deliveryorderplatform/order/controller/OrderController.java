@@ -107,7 +107,7 @@ public class OrderController {
      * @param impl
      * @return
      */
-    @PreAuthorize("hasRole('ROLE_MASTER') or hasRole('ROLE_CUSTOMER'))") // 관리자 혹은 고객인 경우만 접근 가능.
+    @PreAuthorize("hasRole('ROLE_MASTER') or hasRole('ROLE_OWNER')") // 관리자 혹은 고객인 경우만 접근 가능.
     @PatchMapping("/{orderId}/status")
     public ResponseEntity<ApiResponse<Void>> updateOrderStatus(
         @PathVariable UUID orderId, @RequestBody String status, @AuthenticationPrincipal UserDetailsImpl impl) {

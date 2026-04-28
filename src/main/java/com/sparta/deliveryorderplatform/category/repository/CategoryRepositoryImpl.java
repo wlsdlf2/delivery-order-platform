@@ -23,8 +23,7 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom {
         List<Category> list = queryFactory
             .selectFrom(qCategory)
             .where(
-                containsKeyword(searchDTO.getKeyword()),
-                isAccessible(searchDTO.getIsAdmin())
+                containsKeyword(searchDTO.getKeyword())
             )
             .orderBy(qCategory.createdAt.desc())
             .offset(pageable.getOffset())
@@ -35,8 +34,7 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom {
             .select(qCategory.count())
             .from(qCategory)
             .where(
-                containsKeyword(searchDTO.getKeyword()),
-                isAccessible(searchDTO.getIsAdmin())
+                containsKeyword(searchDTO.getKeyword())
             )
             .fetchOne();
 
@@ -49,7 +47,7 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom {
             .selectFrom(qCategory)
             .where(
                 containsKeyword(searchDTO.getKeyword()),
-                isAccessible(searchDTO.getIsAdmin())
+                qCategory.deletedAt.isNull()    // 일반 사용자는 삭제되지 않은 데이터만 조회하도록 고정
             )
             .orderBy(qCategory.createdAt.desc())
             .fetch();
@@ -59,13 +57,4 @@ public class CategoryRepositoryImpl implements CategoryRepositoryCustom {
         return StringUtils.hasText(keyword) ? qCategory.name.contains(keyword) : null;
     }
 
-    private BooleanExpression isAccessible(Boolean isAdmin) {
-        // 관리자가 아닌 일반사용자 -> 삭제되지 않은 데이터만 조회
-        if (isAdmin == null || !isAdmin) {
-            return qCategory.deletedAt.isNull();
-        }
-
-        // 관리자 -> 모든 데이터 조회가능(조건 없음)
-        return null;
-    }
 }
