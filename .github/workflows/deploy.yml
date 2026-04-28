@@ -44,7 +44,7 @@ jobs:
           host: ${{ secrets.APP_HOST }}
           username: ubuntu # ec2-user에서 ubuntu로 수정
           key: ${{ secrets.SSH_KEY }}
-          source: "docker-compose.yml, nginx"
+          source: "docker-compose.yml, nginx/"
           target: "/home/ubuntu/app"
 
       # 6. EC2에 접속하여 Docker Compose 실행
@@ -61,7 +61,7 @@ jobs:
             cd /home/ubuntu/app
             
             # .env 파일 생성
-            echo "ECR_REPOSITORY_URL=${{ steps.login-ecr.outputs.registry }}/my-app-repo" > .env
+            echo "ECR_REPOSITORY_URL=${{ steps.login-ecr.outputs.registry }}/delivery-app-repo" > .env
             echo "DB_URL=${{ secrets.DB_URL }}" >> .env
             echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
