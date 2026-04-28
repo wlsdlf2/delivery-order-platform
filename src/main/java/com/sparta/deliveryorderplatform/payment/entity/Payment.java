@@ -27,7 +27,7 @@ public class Payment extends BaseAuditEntity {
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false, unique = true)
     private Order order;
 
     @Builder.Default
