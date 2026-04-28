@@ -86,10 +86,10 @@ public class PaymentService {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
-        // owner는 본인, 본인 가게 결제만 조회 가능
-        // todo : store owner 확인 로직 추가 (Store 연관관계 완성 후)
+        // owner는 본인 가게 결제만 조회 가능
         if (role.equals(UserRole.OWNER.getAuthority())) {
-            if (!payment.getUser().getUsername().equals(username)) {
+            boolean isMyStore = payment.getOrder().getStore().getOwner().getUsername().equals(username);
+            if (!isMyStore) {
                 throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
             }
         }

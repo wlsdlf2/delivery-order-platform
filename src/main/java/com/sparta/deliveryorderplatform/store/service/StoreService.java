@@ -152,9 +152,9 @@ public class StoreService {
         }
     }
 
-    // 진행중인 주문이 있는지 확인
+    // 진행중인 주문이 있는지 확인 ->
     private void validateNoActiveOrders(UUID storeId) {
-        if (orderService.storeInOrderIsCompleted(storeId)) {
+        if (!orderService.storeInOrderIsCompleted(storeId)) {
             throw new CustomException(ErrorCode.EXIST_ACTIVE_ORDERS);
         }
     }

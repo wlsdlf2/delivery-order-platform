@@ -25,12 +25,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import org.hibernate.annotations.Where;
+
+
 @Getter
 @Table(name = "p_order")
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Where(clause = "deleted_at is NULL") // 삭제 처리된 데이터는 조회되지 않도록 설정.
 public class Order extends BaseAuditEntity {
 
     @Id
