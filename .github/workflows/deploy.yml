@@ -55,21 +55,21 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           envs: ENV_FILE, ECR_REPOSITORY
+          script: |
+            # ECR 로그인 (EC2 내부에서 수행)
+            aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            
+            cd /home/ubuntu/app
+            
+            # .env 파일 생성
+            echo "$ENV_FILE" > .env
+            
+            # 최신 이미지 풀 및 재시작
+            docker compose pull
+            docker compose up -d
+            
+            # 사용하지 않는 오래된 이미지 삭제
+            docker image prune -f
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
           ECR_REPOSITORY: ${{ steps.login-ecr.outputs.registry }}
-        script: |
-          # ECR 로그인 (EC2 내부에서 수행)
-          aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
-          
-          cd /home/ubuntu/app
-          
-          # .env 파일 생성
-          echo "$ENV_FILE" > .env
-          
-          # 최신 이미지 풀 및 재시작
-          docker compose pull
-          docker compose up -d
-          
-          # 사용하지 않는 오래된 이미지 삭제
-          docker image prune -f
