@@ -10,4 +10,5 @@ public interface StoreRepository extends JpaRepository<Store, UUID>, StoreReposi
     Optional<Store> findByIdAndDeletedAtIsNull(UUID id);
 
     boolean existsByAreaIdAndDeletedAtIsNull(UUID areaId);
+    boolean existsByCategoryIdAndDeletedAtIsNull(UUID categoryId);
 }

@@ -1,5 +1,7 @@
 package com.sparta.deliveryorderplatform.order.service;
 
+import com.sparta.deliveryorderplatform.address.entity.Address;
+import com.sparta.deliveryorderplatform.address.repository.AddressRepository;
 import com.sparta.deliveryorderplatform.global.common.PageResponse;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
@@ -11,12 +13,9 @@ import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderSearch;
 import com.sparta.deliveryorderplatform.order.entity.Order;
 import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
-import com.sparta.deliveryorderplatform.order.entity.OrderType;
-import com.sparta.deliveryorderplatform.order.prac.Address;
-import com.sparta.deliveryorderplatform.order.prac.AddressRepository;
-import com.sparta.deliveryorderplatform.order.prac.StoreRepository;
 import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
 import com.sparta.deliveryorderplatform.store.entity.Store;
+import com.sparta.deliveryorderplatform.store.repository.StoreRepository;
 import com.sparta.deliveryorderplatform.user.entity.User;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import com.sparta.deliveryorderplatform.user.repository.UserRepository;
@@ -29,7 +28,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -132,12 +130,12 @@ public class OrderService {
      * @param role     사용자 권한
      */
     @Transactional
-    public void cancleOrder(UUID orderId,String username, UserRole role){
+    public void cancelOrder(UUID orderId,String username, UserRole role){
         //취소할 주문
-        Order cancleOrder = orderRepository.findById(orderId).orElseThrow(()->new CustomException(ErrorCode.ORDER_NOT_FOUND));
+        Order cancelOrder = orderRepository.findById(orderId).orElseThrow(()->new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         //CUSTOMER이지만, 본인 주문이 아닌 경우 접근 제한을 건다.
-        if("ROLE_CUSTOMER".equals(role) && (!username.equals(cancleOrder.getUser().getUsername()))) {
+        if("ROLE_CUSTOMER".equals(role) && (!username.equals(cancelOrder.getUser().getUsername()))) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
@@ -146,7 +144,7 @@ public class OrderService {
         //주문 취소 요청 시 현재 시간을 가져온다.
         LocalDateTime now =  LocalDateTime.now();
         //취소할 주문 건의 주문 생성 시간
-        LocalDateTime orderTime = cancleOrder.getCreatedAt();
+        LocalDateTime orderTime = cancelOrder.getCreatedAt();
 
         //now와 orderTime의 차이를 시,분,초로 계산한다.
         Duration duration = Duration.between(orderTime,now);
@@ -157,7 +155,7 @@ public class OrderService {
         }
         String status = "CANCEL";
         //모든 단계를 통과하면, 정상적으로 주문 상태를 취소 상태로 변경한다.
-        cancleOrder.statusUpdate(status);
+        cancelOrder.statusUpdate(status);
     }
 
     /**
