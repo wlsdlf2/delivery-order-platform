@@ -63,7 +63,7 @@ jobs:
             # .env 파일 생성
             echo "ECR_REPOSITORY_URL=${{ steps.login-ecr.outputs.registry }}/delivery-app-repo" > .env
             echo "DB_URL=${{ secrets.DB_URL }}" >> .env
-            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+            echo "DB_USERNAME=${{ secrets.DB_USER }}" >> .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             
             # 최신 이미지 풀 및 재시작
