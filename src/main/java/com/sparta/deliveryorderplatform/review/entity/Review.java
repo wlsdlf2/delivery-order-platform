@@ -16,7 +16,9 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Table(name = "p_review")
+@Table(name = "p_review", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_review_order_id", columnNames = {"order_id"})
+})
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,7 +29,7 @@ public class Review extends BaseAuditEntity {
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false, unique = true)
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)

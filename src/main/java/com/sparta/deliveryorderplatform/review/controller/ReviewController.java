@@ -97,6 +97,7 @@ public class ReviewController {
      * @param userDetails
      * @return
      */
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('MASTER')")
     @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
