@@ -5,7 +5,6 @@ import java.util.UUID;
 import com.sparta.deliveryorderplatform.address.entity.Address;
 import com.sparta.deliveryorderplatform.global.entity.BaseAuditEntity;
 import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
-import com.sparta.deliveryorderplatform.order.prac.Address;
 import com.sparta.deliveryorderplatform.store.entity.Store;
 import com.sparta.deliveryorderplatform.user.entity.User;
 
