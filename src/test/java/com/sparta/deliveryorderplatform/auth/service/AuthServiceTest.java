@@ -172,7 +172,7 @@ class AuthServiceTest {
 		given(jwtTokenProvider.getRemainingValidityMillis("accessToken")).willReturn(300000L);
 		assertThatCode(() -> authService.logout("user1234", "accessToken"))
 			.doesNotThrowAnyException();
-		verify(tokenBlacklistService).blacklist("accessToken", 300000L);
+		verify(tokenBlacklistService).blacklist("accessToken", "user1234", 300000L);
 		verify(refreshTokenService).delete("user1234");
 	}
 }

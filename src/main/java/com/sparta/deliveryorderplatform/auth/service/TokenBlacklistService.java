@@ -18,11 +18,11 @@ public class TokenBlacklistService {
 
 	private final RedisTemplate<String, String> redisTemplate;
 
-	public void blacklist(String token, long remainingMillis) {
+	public void blacklist(String token, String username, long remainingMillis) {
 		if (remainingMillis <= 0) {
 			return;
 		}
-		redisTemplate.opsForValue().set(PREFIX + hash(token), "1", Duration.ofMillis(remainingMillis));
+		redisTemplate.opsForValue().set(PREFIX + hash(token), username, Duration.ofMillis(remainingMillis));
 	}
 
 	public boolean isBlacklisted(String token) {
