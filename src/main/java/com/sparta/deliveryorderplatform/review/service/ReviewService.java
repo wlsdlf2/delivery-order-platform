@@ -11,6 +11,7 @@ import com.sparta.deliveryorderplatform.review.dto.request.UpdateReviewRequest;
 import com.sparta.deliveryorderplatform.review.dto.response.ReviewResponse;
 import com.sparta.deliveryorderplatform.review.entity.Review;
 import com.sparta.deliveryorderplatform.review.repository.ReviewRepository;
+import com.sparta.deliveryorderplatform.store.entity.Store;
 import com.sparta.deliveryorderplatform.user.entity.User;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +56,13 @@ public class ReviewService {
 
         Review review = Review.create(order, request.getRating(), request.getContent());
 
-        return ReviewResponse.from(reviewRepository.save(review));
+        // db에 즉시 반영
+        reviewRepository.saveAndFlush(review);
+
+        // 가게 리뷰 평점 계산
+        updateStoreAverageRating(review.getStore());
+
+        return ReviewResponse.from(review);
     }
 
     @Transactional(readOnly = true)
@@ -92,7 +99,12 @@ public class ReviewService {
             throw new CustomException(ErrorCode.REVIEW_UPDATE_FORBIDDEN);
         }
 
+        // 리뷰 업데이트
         review.update(request.getRating(), request.getContent());
+        reviewRepository.flush();
+
+        // 가게 리뷰 평점 계산
+        updateStoreAverageRating(review.getStore());
 
         return ReviewResponse.from(review);
     }
@@ -108,12 +120,22 @@ public class ReviewService {
             throw new CustomException(ErrorCode.REVIEW_DELETE_FORBIDDEN);
         }
 
+        // 삭제
         review.softDelete(user.getUsername());
+        reviewRepository.flush();
+
+        // 가게 리뷰 평점 계산
+        updateStoreAverageRating(review.getStore());
     }
 
     private Review findReviewById(UUID id) {
         return reviewRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(
                 () -> new CustomException(ErrorCode.REVIEW_NOT_FOUND)
         );
+    }
+
+    private void updateStoreAverageRating(Store store) {
+        Double newAverageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
+        store.updateAverageRating(newAverageRating);
     }
 }
