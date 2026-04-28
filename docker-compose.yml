@@ -2,8 +2,7 @@ version: "3.8"
 
 services:
   app:
-    #image:
-    build: .  # 로컬 테스트 용
+    image: ${ECR_REPOSITORY_URL}:latest
     container_name: delivery-app
     ports:
       - "8080:8080"
