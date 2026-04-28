@@ -61,12 +61,13 @@ jobs:
             
             cd /home/ubuntu/app
             
-            # .env 파일 생성
-            echo "$ENV_FILE" > .env
+            # 1. 기존 .env 삭제 후 새로 생성
+            rm -f .env
+            echo "$ENV_FILE" | tr -d '\r' > .env
             
-            # 최신 이미지 풀 및 재시작
+            # 컨테이너를 완전히 내렸다가 다시 올리기 (환경 변수 강제 갱신)
             docker compose pull
-            docker compose up -d
+            docker compose up -d --force-recreate
             
             # 사용하지 않는 오래된 이미지 삭제
             docker image prune -f
