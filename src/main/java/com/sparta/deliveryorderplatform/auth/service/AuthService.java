@@ -26,6 +26,8 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final TokenBlacklistService tokenBlacklistService;
+	private final RefreshTokenService refreshTokenService;
 
 	@Transactional
 	public void signup(SignUpRequestDto requestDto) {
@@ -75,13 +77,31 @@ public class AuthService {
 		// 토큰 발급
 		String accessToken = jwtTokenProvider.createAccessToken(user.getUsername(), user.getRole());
 		String refreshToken = jwtTokenProvider.createRefreshToken(user.getUsername());
+		refreshTokenService.save(user.getUsername(), refreshToken, jwtTokenProvider.getRefreshTokenExpiration());
 
 		return LoginResponseDto.of(accessToken, refreshToken, user.getUsername(), user.getRole());
 	}
 
-	@Transactional
-	public void logout(String username) {
-		// TODO: 추후 Redis 연결 시 리프레시 토큰 삭제 및 액세스 토큰 블랙리스트 로직 추가
+	public void logout(String username, String accessToken) {
+		if (accessToken != null) {
+			long remainingMillis = jwtTokenProvider.getRemainingValidityMillis(accessToken);
+			tokenBlacklistService.blacklist(accessToken, remainingMillis);
+		}
+		refreshTokenService.delete(username);
 		log.info("User logged out: {}", username);
+	}
+
+	public LoginResponseDto refresh(String refreshToken) {
+		if (!jwtTokenProvider.validateToken(refreshToken)) {
+			throw new CustomException(ErrorCode.INVALID_TOKEN);
+		}
+		String username = jwtTokenProvider.getUsername(refreshToken);
+		if (!refreshTokenService.validate(username, refreshToken)) {
+			throw new CustomException(ErrorCode.INVALID_TOKEN);
+		}
+		User user = userRepository.findById(username)
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+		String newAccessToken = jwtTokenProvider.createAccessToken(username, user.getRole());
+		return LoginResponseDto.of(newAccessToken, refreshToken, username, user.getRole());
 	}
 }
