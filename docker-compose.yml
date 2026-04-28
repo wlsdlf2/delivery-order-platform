@@ -9,3 +9,15 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+
+  # nginx 서비스
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - app
+    restart: unless-stopped
