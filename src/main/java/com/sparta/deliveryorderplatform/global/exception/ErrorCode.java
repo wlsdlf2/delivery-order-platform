@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ErrorCode {
 	VALIDATION_ERROR(400, "VALIDATION_ERROR", "요청 값이 올바르지 않습니다."),
+	INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다."),
 
 	// auth
 	LOGIN_FAILED(400, "LOGIN_FAILED", "아이디 또는 비밀번호가 일치하지 않습니다."),
@@ -59,12 +60,8 @@ public enum ErrorCode {
 
 	//Order
 	ORDER_NOT_FOUND(404,"ORDER_NOT_FOUND","주문을 찾을 수 없습니다."),
-	CANCLE_TIME_OUT(400, "CANCLE_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
-	EXIST_ACTIVE_ORDERS(409, "EXIST_ACTIVE_ORDERS", "진행 중인 주문이 있어 처리할 수 없습니다."),
-
-	//Order
-	ORDER_NOT_FOUND(404,"ORDER_NOT_FOUND","주문을 찾을 수 없습니다."),
 	CANCEL_TIME_OUT(400, "CANCEL_TIME_OUT", "주문 생성 후 5분이 경과하여 취소할 수 없습니다."),
+	EXIST_ACTIVE_ORDERS(409, "EXIST_ACTIVE_ORDERS", "진행 중인 주문이 있어 처리할 수 없습니다."),
 
 	// jwt
 	INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
