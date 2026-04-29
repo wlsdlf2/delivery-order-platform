@@ -85,7 +85,7 @@ public class User extends BaseAuditEntity {
 		this.role = newRole;
 	}
 
-	static User reconstruct(String username, String nickname, String email,
+	public static User reconstruct(String username, String nickname, String email,
 			UserRole role, Boolean isPublic) {
 		return User.builder()
 			.username(username)
