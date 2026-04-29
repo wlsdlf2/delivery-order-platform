@@ -26,6 +26,7 @@ public class UserService {
 
 	private final UserRepository userRepository;
 	private final BCryptPasswordEncoder passwordEncoder;
+	private final UserCacheService userCacheService;
 
 	public Page<UserResponseDto> getUsers (UserSearchCondition condition, Pageable pageable) {
 		Page<User> userPage = userRepository.searchUsers(condition, pageable);
@@ -43,10 +44,8 @@ public class UserService {
 		checkPermission(username, loginUser);
 		User user = findById(username);
 
-		// 공통 수정 필드 (닉네임, 이메일, 공개여부) - 본인/MASTER 가능
 		user.updateProfile(requestDto.nickname(), requestDto.email(), requestDto.isPublic());
-
-		// 필요 시 다른 필드 업데이트 로직 추가
+		userCacheService.evict(username);
 		return UserResponseDto.from(user);
 	}
 
@@ -63,8 +62,8 @@ public class UserService {
 			throw new CustomException(ErrorCode.INVALID_PASSWORD); // 비밀번호 불일치 에러
 		}
 
-		// 3. 새 비밀번호 암호화 및 업데이트
 		user.updatePassword(passwordEncoder.encode(requestDto.newPassword()));
+		userCacheService.evict(username);
 	}
 
 	public void updateUserRole (String username, UserRoleUpdateRequestDto requestDto, User loginUser) {
@@ -79,6 +78,7 @@ public class UserService {
 		}
 
 		user.updateRole(requestDto.role());
+		userCacheService.evict(username);
 	}
 
 	@Transactional
@@ -87,6 +87,7 @@ public class UserService {
 		User user = findById(username);
 
 		user.softDelete(loginUser.getUsername());
+		userCacheService.evict(username);
 	}
 
 	// 공통 권한 체크 메서드

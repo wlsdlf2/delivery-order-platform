@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.sparta.deliveryorderplatform.auth.jwt.JwtAuthenticationEntryPoint;
 import com.sparta.deliveryorderplatform.auth.jwt.JwtAuthenticationFilter;
 import com.sparta.deliveryorderplatform.auth.jwt.JwtTokenProvider;
+import com.sparta.deliveryorderplatform.auth.service.TokenBlacklistService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +27,7 @@ public class SecurityConfig {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final UserDetailsService userDetailsService;
+	private final TokenBlacklistService tokenBlacklistService;
 
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -42,6 +44,7 @@ public class SecurityConfig {
 				.requestMatchers(
 					"/api/v1/auth/signup/signup",	// 회원가입
 					"/api/v1/auth/signup/login",	// 로그인
+					"/api/v1/auth/signup/refresh",	// 토큰 갱신
 					"/v3/api-docs/**",				// Swagger
 					"/swagger-ui/**",
 					"swagger-ui.html"
@@ -54,7 +57,7 @@ public class SecurityConfig {
 			)
 			// 미리 만들어둔 JwtAuthenticationFilter를
 			// UsernamePasswordAuthenticationFilter(기본 로그인 필터) 보다 먼저 실행되게 끼워 넣는다.
-			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService),
+			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, tokenBlacklistService),
 							UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
