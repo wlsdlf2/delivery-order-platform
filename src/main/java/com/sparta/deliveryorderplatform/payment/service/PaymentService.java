@@ -88,8 +88,8 @@ public class PaymentService {
 
         // owner는 본인 가게 결제만 조회 가능
         if (role.equals(UserRole.OWNER.getAuthority())) {
-            boolean isMyStore = payment.getOrder().getStore().getOwner().getUsername().equals(username);
-            if (!isMyStore) {
+            String ownerUsername = paymentRepository.findOwnerUsernameByPaymentId(paymentId);
+            if (!username.equals(ownerUsername)) {
                 throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
             }
         }

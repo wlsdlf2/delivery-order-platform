@@ -50,6 +50,10 @@ public class GlobalExceptionHandler {
 				return ResponseEntity.status(409)
 						.body(ApiResponse.fail(ErrorCode.REVIEW_ALREADY_EXISTS));
 			}
+			if (constraintName.contains("uk_payment_order_id")) {
+				return ResponseEntity.status(409)
+						.body(ApiResponse.fail(ErrorCode.PAYMENT_ALREADY_EXISTS));
+			}
 		}
 		return ResponseEntity.status(500).body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
 	}

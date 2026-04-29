@@ -30,11 +30,11 @@ public class PaymentController {
      * @param orderId
      * @param request
      * @param userDetails
-     * @return
+     * @return PaymentResponse
      */
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/orders/{orderId}/payments")
-    public ResponseEntity<?> createPayment(@PathVariable UUID orderId,
+    public ResponseEntity<ApiResponse<PaymentResponse>> createPayment(@PathVariable UUID orderId,
                                            @Valid @RequestBody CreatePaymentRequest request,
                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
@@ -48,10 +48,10 @@ public class PaymentController {
      * @param page
      * @param size
      * @param userDetails
-     * @return
+     * @return Page<PaymentResponse>
      */
     @GetMapping("/payments")
-    public ResponseEntity<?> getPaymentList(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<ApiResponse<PageResponse<PaymentResponse>>> getPaymentList(@RequestParam(defaultValue = "0") int page,
                                             @RequestParam(defaultValue = "10") int size,
                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
@@ -69,10 +69,10 @@ public class PaymentController {
      * 결제 상세 조회 api
      * @param paymentId
      * @param userDetails
-     * @return
+     * @return PaymentResponse
      */
     @GetMapping("/payments/{paymentId}")
-    public ResponseEntity<?> getPaymentById(@PathVariable UUID paymentId,
+    public ResponseEntity<ApiResponse<PaymentResponse>> getPaymentById(@PathVariable UUID paymentId,
                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         PaymentResponse response = paymentService.getPaymentById(
@@ -88,11 +88,11 @@ public class PaymentController {
      * 결제 상태 수정 api
      * @param paymentId
      * @param request
-     * @return
+     * @return PaymentResponse
      */
     @PreAuthorize("hasRole('MASTER')")
     @PatchMapping("/payments/{paymentId}")
-    public ResponseEntity<?> updatePaymentStatus(@PathVariable UUID paymentId,
+    public ResponseEntity<ApiResponse<PaymentResponse>> updatePaymentStatus(@PathVariable UUID paymentId,
                                                  @Valid @RequestBody UpdatePaymentStatusRequest request) {
 
         PaymentResponse response = paymentService.updatePaymentStatus(paymentId, request);
@@ -108,7 +108,7 @@ public class PaymentController {
      */
     @PreAuthorize("hasRole('MASTER')")
     @DeleteMapping("/payments/{paymentId}")
-    public ResponseEntity<?> deletePayment(@PathVariable UUID paymentId,
+    public ResponseEntity<ApiResponse<Void>> deletePayment(@PathVariable UUID paymentId,
                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         paymentService.deletePayment(paymentId, userDetails.getUser());
