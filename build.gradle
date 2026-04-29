@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.4'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'com.sparta'
@@ -22,7 +23,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     // JWT
-    compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
 
@@ -38,6 +39,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
+    testImplementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
     runtimeOnly 'org.postgresql:postgresql'
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -56,4 +59,82 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport // test가 끝나면 리포트 생성
+}
+
+check {
+    dependsOn jacocoTestCoverageVerification
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+// 리포트 생성 설정
+jacocoTestReport {
+    dependsOn test // 리포트 생성을 위해 테스트 먼저 실행
+    reports {
+        html.outputLocation = layout.buildDirectory.dir("jacoco/html")
+    }
+
+    // QueryDSL Q클래스 및 제외 대상 설정
+    def Qdomains = []
+    for (qPattern in '**/QA'..'**/QZ') {
+        Qdomains.add(qPattern + '*')
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "**/*Application*",
+                    "**/*Config*",
+                    "**/*Dto*",
+                    "**/*Request*",
+                    "**/*Response*",
+                    "**/*Controller*",
+                    "**/*Repository*",
+                    "**/*Exception*",
+                    "**/*Entity*",
+                    "**/*Enum*",
+            ] + Qdomains)
+        }))
+    }
+}
+
+// 커버리지 검증 설정
+jacocoTestCoverageVerification {
+    dependsOn test
+
+    def Qdomains = []
+    for (qPattern in '**/QA'..'**/QZ') {
+        Qdomains.add(qPattern + '*')
+    }
+
+    violationRules {
+        rule {
+            enabled = true
+            element = 'CLASS'
+
+            // 라인 커버리지 기준 설정 (일단 0%)
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.00
+            }
+
+            // 제외 대상 설정
+            excludes = [
+                "**/*Application*",
+                "**/*Config*",
+                "**/*Dto*",
+                "**/*Request*",
+                "**/*Response*",
+                "**/*Controller*",
+                "**/*Repository*",
+                "**/*Exception*",
+                "**/*Entity*",
+                "**/*Enum*",
+            ] + Qdomains
+        }
+    }
 }

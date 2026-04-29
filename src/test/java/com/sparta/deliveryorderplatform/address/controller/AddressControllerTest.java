@@ -51,6 +51,7 @@ class AddressControllerTest {
 	@MockBean AddressService addressService;
 	@MockBean JwtTokenProvider jwtTokenProvider;
 	@MockBean org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+	@MockBean com.sparta.deliveryorderplatform.auth.service.TokenBlacklistService tokenBlacklistService;
 
 	private Authentication authOf(User user) {
 		UserDetailsImpl userDetails = new UserDetailsImpl(user);

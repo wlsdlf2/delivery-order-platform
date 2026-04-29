@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,14 @@ import com.sparta.deliveryorderplatform.auth.dto.SignUpRequestDto;
 import com.sparta.deliveryorderplatform.auth.jwt.JwtAuthenticationEntryPoint;
 import com.sparta.deliveryorderplatform.auth.jwt.JwtTokenProvider;
 import com.sparta.deliveryorderplatform.auth.service.AuthService;
+import com.sparta.deliveryorderplatform.auth.service.LoginRateLimiter;
+import com.sparta.deliveryorderplatform.auth.service.TokenBlacklistService;
 import com.sparta.deliveryorderplatform.global.config.SecurityConfig;
 import com.sparta.deliveryorderplatform.global.exception.CustomException;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
+import com.sparta.deliveryorderplatform.user.entity.User;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
+import com.sparta.deliveryorderplatform.user.security.UserDetailsImpl;
 
 @WebMvcTest(AuthController.class)
 @Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class})
@@ -40,6 +45,14 @@ class AuthControllerTest {
 
 	@MockBean AuthService authService;
 	@MockBean JwtTokenProvider jwtTokenProvider;
+	@MockBean TokenBlacklistService tokenBlacklistService;
+	@MockBean LoginRateLimiter loginRateLimiter;
+	@MockBean org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+
+	@BeforeEach
+	void setUp() {
+		given(loginRateLimiter.isAllowed(any())).willReturn(true);
+	}
 
 	// ─── 회원가입 ────────────────────────────────────────────────────────────
 
@@ -188,8 +201,10 @@ class AuthControllerTest {
 	@Test
 	@DisplayName("로그아웃 성공 - 인증된 사용자가 200 응답을 받는다")
 	void logout_authenticated_returns200() throws Exception {
+		User user = User.createUser("user1234", "닉네임", "test@example.com", "encodedPw", UserRole.CUSTOMER);
+		UserDetailsImpl userDetails = new UserDetailsImpl(user);
 		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-			"user1234", null, List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"))
+			userDetails, null, userDetails.getAuthorities()
 		);
 
 		mockMvc.perform(post("/api/v1/auth/signup/logout")

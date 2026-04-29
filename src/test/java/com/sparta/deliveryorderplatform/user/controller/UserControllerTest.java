@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -49,6 +50,7 @@ class UserControllerTest {
 	@MockBean UserService userService;
 	@MockBean JwtTokenProvider jwtTokenProvider;
 	@MockBean org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+	@MockBean com.sparta.deliveryorderplatform.auth.service.TokenBlacklistService tokenBlacklistService;
 
 	private Authentication authOf(User user) {
 		UserDetailsImpl userDetails = new UserDetailsImpl(user);
@@ -219,7 +221,7 @@ class UserControllerTest {
 	@Test
 	@DisplayName("사용자 삭제 성공 - 인증된 사용자가 200을 반환한다")
 	void deleteUser_authenticated_returns200() throws Exception {
-		mockMvc.perform(patch("/api/v1/users/user1234")
+		mockMvc.perform(delete("/api/v1/users/user1234")
 				.with(authentication(customerAuth())))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("SUCCESS"));
