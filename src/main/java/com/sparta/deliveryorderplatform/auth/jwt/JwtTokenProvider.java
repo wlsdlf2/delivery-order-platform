@@ -95,6 +95,16 @@ public class JwtTokenProvider {
 			.parseClaimsJws(token).getBody().get("auth", String.class);
 	}
 
+	public long getRemainingValidityMillis(String token) {
+		try {
+			Date expiration = Jwts.parserBuilder().setSigningKey(key).build()
+				.parseClaimsJws(token).getBody().getExpiration();
+			return Math.max(expiration.getTime() - System.currentTimeMillis(), 0);
+		} catch (io.jsonwebtoken.ExpiredJwtException e) {
+			return 0;
+		}
+	}
+
 	/*
 	 * 만료 여부 확인
 	 * 토큰의 유효 시간이 지났는지 따로 체크한다.
