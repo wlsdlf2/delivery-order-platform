@@ -8,21 +8,31 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.sparta.deliveryorderplatform.auth.service.TokenBlacklistService;
 import com.sparta.deliveryorderplatform.global.exception.ErrorCode;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtTokenProvider jwtTokenProvider;
 	private final UserDetailsService userDetailsService;
+	private final TokenBlacklistService tokenBlacklistService;
+
+	public JwtAuthenticationFilter(
+		JwtTokenProvider jwtTokenProvider,
+		UserDetailsService userDetailsService,
+		TokenBlacklistService tokenBlacklistService
+	) {
+		this.jwtTokenProvider = jwtTokenProvider;
+		this.userDetailsService = userDetailsService;
+		this.tokenBlacklistService = tokenBlacklistService;
+	}
 
 	/*
 	 * 필터의 핵심 로직
@@ -42,6 +52,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (token != null) {
 			try {
 				if (jwtTokenProvider.validateToken(token)) {
+					if (tokenBlacklistService.isBlacklisted(token)) {
+						request.setAttribute("exception", ErrorCode.INVALID_TOKEN);
+						filterChain.doFilter(request, response);
+						return;
+					}
 					// 토큰에서 사용자 아이디를 꺼낸다.
 					String username = jwtTokenProvider.getUsername(token);
 
