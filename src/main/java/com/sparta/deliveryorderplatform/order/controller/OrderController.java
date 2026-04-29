@@ -5,7 +5,6 @@ import com.sparta.deliveryorderplatform.global.common.PageResponse;
 import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderSearch;
-import com.sparta.deliveryorderplatform.order.service.OrderItemService;
 import com.sparta.deliveryorderplatform.order.service.OrderService;
 import com.sparta.deliveryorderplatform.user.security.UserDetailsImpl;
 import jakarta.validation.Valid;
@@ -34,8 +33,6 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
-    @Autowired
-    private OrderItemService orderItemService;
 
     /**
      * 주문 상세 조회
@@ -147,9 +144,6 @@ public class OrderController {
 
         // 주문 생성
         OrderResponseDto newOrder = orderService.createOrder(orderRequestDto, impl.getUsername());
-
-        // 주문 메뉴 추가.
-        orderItemService.createOrderitem(orderRequestDto, newOrder.getOrderId());
 
         return ResponseEntity.ok(ApiResponse.success(newOrder));
     }

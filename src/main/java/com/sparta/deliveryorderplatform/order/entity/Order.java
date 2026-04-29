@@ -1,5 +1,9 @@
 package com.sparta.deliveryorderplatform.order.entity;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.sparta.deliveryorderplatform.address.entity.Address;
@@ -26,14 +30,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.Where;
+import org.springframework.data.repository.query.parser.Part.IgnoreCaseType;
 
 
 @Getter
-@Table(name = "p_order")
-@Entity
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Table(name = "p_order")
+@Entity
 @Where(clause = "deleted_at is NULL") // 삭제 처리된 데이터는 조회되지 않도록 설정.
 public class Order extends BaseAuditEntity {
 
@@ -70,10 +75,27 @@ public class Order extends BaseAuditEntity {
     @Lob
     private String request; // 주문 요청 사항
 
+    //Cascase 덕분에 Order만 save해도 OrderItem들이 자동으로 DB에 저장됨.
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<OrderItem> orderItemsList = new ArrayList<>();
+
+    //연관관계 편의 메서드
+    //Order에 OrderItem을 집어 넣기 위한 전용 메서드
+    public void addOrderItem(OrderItem orderitem) {
+        this.orderItemsList.add(orderitem);
+    }
+
+    // 총 주문 금액만 넣는 update 쿼리문
+    public void updateTotalPrice(Integer totalPrice){
+        this.totalPrice = totalPrice;
+    }
+
     //주문 상태 변경.
     public void statusUpdate(String status){
         this.status = OrderStatus.valueOf(status);
     }
+
 
     //주문 요청 사항 변경
     public void update(OrderRequestDto req, Store store, Address address) {

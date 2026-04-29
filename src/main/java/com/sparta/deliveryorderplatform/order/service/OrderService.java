@@ -12,6 +12,7 @@ import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderSearch;
 import com.sparta.deliveryorderplatform.order.entity.Order;
+import com.sparta.deliveryorderplatform.order.entity.OrderItem;
 import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
 import com.sparta.deliveryorderplatform.order.repository.OrderRepository;
 import com.sparta.deliveryorderplatform.store.entity.Store;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -84,12 +86,13 @@ public class OrderService {
             .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         //OWNER의 경우 자기 가게로의 주문이 아닌, 다른 가게의 주문을 상세 조회할 경우 접근 제한.
-        if (role == UserRole.OWNER && !username.equals(detailOrder.getStore().getOwner().getUsername())) {
+        if (role == UserRole.OWNER && !username.equals(
+            detailOrder.getStore().getOwner().getUsername())) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         //CUSTOMER의 경우 자기 주문이 아닌 남의 주문을 상세 조회 할 경우 접근 제한.
-        if(role == UserRole.CUSTOMER && !username.equals(detailOrder.getUser().getUsername())) {
+        if (role == UserRole.CUSTOMER && !username.equals(detailOrder.getUser().getUsername())) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
@@ -266,59 +269,105 @@ public class OrderService {
      */
     @Transactional
     public OrderResponseDto createOrder(OrderRequestDto orderRequestDto, String username) {
+        // user 정보 가져옴.
+        User orderUser = userRepository.findById(username)
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        //store 정보 가져옴.
+        Store orderStore = storeRepository.findById(orderRequestDto.getStoreId())
+            .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+        //address 정보 가져옴.
+        Address orderAddress = addressRepository.findById(orderRequestDto.getAddressId())
+            .orElseThrow(() -> new CustomException(ErrorCode.ADDRESS_NOT_FOUND));
 
-        // username으로 User를 조회 한다.
-        User user = userRepository.findById(username).orElseThrow(() ->
-            new CustomException(ErrorCode.USER_NOT_FOUND));
+        // 총 주문 금액.
+        Integer totlaPrice = 0;
 
-        // 생성할 주문 데이터에서 store를 조회한다.
-        Store store = storeRepository.findById(orderRequestDto.getStoreId()).orElseThrow(() ->
-            new CustomException(ErrorCode.STORE_NOT_FOUND));
+        //Db에 저장 시킬 Order를 미리 만듦.
+        Order newOrder = Order.createOrder(orderUser, orderStore, orderAddress,
+            orderRequestDto.getOrderType(), totlaPrice, orderRequestDto.getRequest());
 
-        // 생성할 주문 데이터에서 address를 조회한다.
-        Address address = addressRepository.findById(orderRequestDto.getAddressId())
-            .orElseThrow(() ->
-                new IllegalArgumentException("주소없음."));
+        //OrderRequestDto에서 OrderItemReqestDto를 꺼낸다.
+        List<OrderItemRequestDto> orderItemsList = orderRequestDto.getItems();
 
-        // 생성할 주문 데이터 안에서 생성할 주문 메뉴 리스트를 추출.
-        List<OrderItemRequestDto> items = orderRequestDto.getItems();
+        //OrderItemList에서 menuId를 가져와 리스트로 만든다.
+        List<UUID> orderMenuIdList = orderItemsList.stream().map(OrderItemRequestDto::getMenuId)
+            .collect(Collectors.toList());
 
-        // 주문 메뉴 리스트에서 menuId만 추출.
-        List<UUID> menuIds = items.stream()
-            .map(OrderItemRequestDto::getMenuId)
-            .toList();
+        //가져온 menuId 전부를 DB에서 호출하여 Menu 리스트를 가져온다.
+        List<Menu> orderMenuList = menuRepository.findAllById(orderMenuIdList);
 
-        // N개의 menuId를 DB에 요청하여 N개의 메뉴 리스트를 조회 - 안에 금액이 들어있음.
-        List<Menu> menus = menuRepository.findAllById(menuIds);
-
-        // 내부적으로 이중for문을 피하기 위해 메뉴 리스트를 map으로 변환.
-        Map<UUID, Menu> menuMap = new HashMap<>();
-        for (Menu menu : menus) {
-            menuMap.put(menu.getMenuId(), menu);
+        //이 Menu 리스트를 map으로 변환한다.
+        Map<UUID, Menu> orderMenuMap = new HashMap<>();
+        for (Menu menu : orderMenuList) {
+            orderMenuMap.put(menu.getMenuId(), menu);
         }
 
-        // 총 주문 금액을 계산하기 위한 변수.
-        Integer totalPrice = 0;
+        //이렇게 만든 Menu와 OrderItemRequestDto를 가지고, totalPrice와 OrderItem을 만들고 , Order에 저장한다.
+        for (OrderItemRequestDto orderItemReq : orderItemsList) {
+            // totalPrice를 계산한다.
+            Menu orderMenu = orderMenuMap.get(orderItemReq.getMenuId());
+            totlaPrice += orderMenu.getPrice() * orderItemReq.getQuantity();
 
-        //생성할 주문메뉴 리스트를 순회하면서
-        for (OrderItemRequestDto item : items) {
-
-            //메뉴 리스트 중 1개를 뽑아서
-            Menu orderedMenu = menuMap.get(item.getMenuId());
-
-            // 메뉴별 가격 * 수량을 계산하여 총 주문 금액을 계산한다.
-            totalPrice += orderedMenu.getPrice() * item.getQuantity();
+            OrderItem orderItem = OrderItem.createOrderItem(newOrder, orderMenu, orderItemReq.getQuantity(), orderMenu.getPrice());
+            newOrder.addOrderItem(orderItem);
         }
-
-        // 새로운 Order 객체로 변환
-        Order newOrder = Order.createOrder(user
-            , store
-            , address
-            , orderRequestDto.getOrderType()
-            , totalPrice
-            , orderRequestDto.getRequest());
-
+        newOrder.updateTotalPrice(totlaPrice);
         orderRepository.save(newOrder);
-        return OrderResponseDto.from(newOrder);
+
+        return  OrderResponseDto.from(newOrder);
     }
+
+    //        // username으로 User를 조회 한다.
+//        User user = userRepository.findById(username).orElseThrow(() ->
+//            new CustomException(ErrorCode.USER_NOT_FOUND));
+//
+//        // 생성할 주문 데이터에서 store를 조회한다.
+//        Store store = storeRepository.findById(orderRequestDto.getStoreId()).orElseThrow(() ->
+//            new CustomException(ErrorCode.STORE_NOT_FOUND));
+//
+//        // 생성할 주문 데이터에서 address를 조회한다.
+//        Address address = addressRepository.findById(orderRequestDto.getAddressId())
+//            .orElseThrow(() ->
+//                new IllegalArgumentException("주소없음."));
+//
+//        // 생성할 주문 데이터 안에서 생성할 주문 메뉴 리스트를 추출.
+//        List<OrderItemRequestDto> items = orderRequestDto.getItems();
+//
+//        // 주문 메뉴 리스트에서 menuId만 추출.
+//        List<UUID> menuIds = items.stream()
+//            .map(OrderItemRequestDto::getMenuId)
+//            .toList();
+//
+//        // N개의 menuId를 DB에 요청하여 N개의 메뉴 리스트를 조회 - 안에 금액이 들어있음.
+//        List<Menu> menus = menuRepository.findAllById(menuIds);
+//
+//        // 내부적으로 이중for문을 피하기 위해 메뉴 리스트를 map으로 변환.
+//        Map<UUID, Menu> menuMap = new HashMap<>();
+//        for (Menu menu : menus) {
+//            menuMap.put(menu.getMenuId(), menu);
+//        }
+//
+//        // 총 주문 금액을 계산하기 위한 변수.
+//        Integer totalPrice = 0;
+//
+//        //생성할 주문메뉴 리스트를 순회하면서
+//        for (OrderItemRequestDto item : items) {
+//
+//            //메뉴 리스트 중 1개를 뽑아서
+//            Menu orderedMenu = menuMap.get(item.getMenuId());
+//
+//            // 메뉴별 가격 * 수량을 계산하여 총 주문 금액을 계산한다.
+//            totalPrice += orderedMenu.getPrice() * item.getQuantity();
+//        }
+//
+//        // 새로운 Order 객체로 변환
+//        Order newOrder = Order.createOrder(user
+//            , store
+//            , address
+//            , orderRequestDto.getOrderType()
+//            , totalPrice
+//            , orderRequestDto.getRequest());
+//
+//        orderRepository.save(newOrder);
+//        return OrderResponseDto.from(newOrder);
 }
