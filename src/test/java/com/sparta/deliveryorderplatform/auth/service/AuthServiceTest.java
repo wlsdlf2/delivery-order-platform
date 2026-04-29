@@ -175,4 +175,57 @@ class AuthServiceTest {
 		verify(tokenBlacklistService).blacklist("accessToken", "user1234", 300000L);
 		verify(refreshTokenService).delete("user1234");
 	}
+
+	// ─── 토큰 갱신 ───────────────────────────────────────────────────────────
+
+	@Test
+	@DisplayName("토큰 갱신 성공 - 새 액세스 토큰이 반환된다")
+	void refresh_success_returnsNewAccessToken() {
+		User user = User.createUser("user1234", "닉네임", "test@example.com", "encodedPassword", UserRole.CUSTOMER);
+		given(jwtTokenProvider.validateToken("refreshToken")).willReturn(true);
+		given(jwtTokenProvider.getUsername("refreshToken")).willReturn("user1234");
+		given(refreshTokenService.validate("user1234", "refreshToken")).willReturn(true);
+		given(userRepository.findById("user1234")).willReturn(Optional.of(user));
+		given(jwtTokenProvider.createAccessToken("user1234", UserRole.CUSTOMER)).willReturn("newAccessToken");
+
+		LoginResponseDto response = authService.refresh("refreshToken");
+
+		assertThat(response.accessToken()).isEqualTo("newAccessToken");
+		assertThat(response.refreshToken()).isEqualTo("refreshToken");
+	}
+
+	@Test
+	@DisplayName("토큰 갱신 실패 - 유효하지 않은 토큰이면 INVALID_TOKEN 예외 발생")
+	void refresh_invalidToken_throwsInvalidToken() {
+		given(jwtTokenProvider.validateToken("badToken")).willReturn(false);
+
+		assertThatThrownBy(() -> authService.refresh("badToken"))
+			.isInstanceOf(CustomException.class)
+			.extracting("errorCode").isEqualTo(ErrorCode.INVALID_TOKEN);
+	}
+
+	@Test
+	@DisplayName("토큰 갱신 실패 - Redis 저장값과 불일치하면 INVALID_TOKEN 예외 발생")
+	void refresh_tokenMismatch_throwsInvalidToken() {
+		given(jwtTokenProvider.validateToken("refreshToken")).willReturn(true);
+		given(jwtTokenProvider.getUsername("refreshToken")).willReturn("user1234");
+		given(refreshTokenService.validate("user1234", "refreshToken")).willReturn(false);
+
+		assertThatThrownBy(() -> authService.refresh("refreshToken"))
+			.isInstanceOf(CustomException.class)
+			.extracting("errorCode").isEqualTo(ErrorCode.INVALID_TOKEN);
+	}
+
+	@Test
+	@DisplayName("토큰 갱신 실패 - 존재하지 않는 사용자면 USER_NOT_FOUND 예외 발생")
+	void refresh_userNotFound_throwsUserNotFound() {
+		given(jwtTokenProvider.validateToken("refreshToken")).willReturn(true);
+		given(jwtTokenProvider.getUsername("refreshToken")).willReturn("ghost123");
+		given(refreshTokenService.validate("ghost123", "refreshToken")).willReturn(true);
+		given(userRepository.findById("ghost123")).willReturn(Optional.empty());
+
+		assertThatThrownBy(() -> authService.refresh("refreshToken"))
+			.isInstanceOf(CustomException.class)
+			.extracting("errorCode").isEqualTo(ErrorCode.USER_NOT_FOUND);
+	}
 }

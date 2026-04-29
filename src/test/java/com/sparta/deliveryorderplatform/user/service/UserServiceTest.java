@@ -36,6 +36,7 @@ class UserServiceTest {
 
 	@Mock UserRepository userRepository;
 	@Mock BCryptPasswordEncoder passwordEncoder;
+	@Mock UserCacheService userCacheService;
 	@InjectMocks UserService userService;
 
 	private User createCustomer(String username) {

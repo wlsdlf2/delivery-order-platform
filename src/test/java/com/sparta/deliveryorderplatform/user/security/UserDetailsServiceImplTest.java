@@ -18,11 +18,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import com.sparta.deliveryorderplatform.user.entity.User;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import com.sparta.deliveryorderplatform.user.repository.UserRepository;
+import com.sparta.deliveryorderplatform.user.service.UserCacheService;
 
 @ExtendWith(MockitoExtension.class)
 class UserDetailsServiceImplTest {
 
 	@Mock UserRepository userRepository;
+	@Mock UserCacheService userCacheService;
 	@InjectMocks UserDetailsServiceImpl userDetailsService;
 
 	private User createCustomer(String username) {
