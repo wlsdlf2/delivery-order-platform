@@ -86,24 +86,31 @@ public class Order extends BaseAuditEntity {
         this.orderItemsList.add(orderitem);
     }
 
-    // 총 주문 금액만 넣는 update 쿼리문
+    // 총 주문 금액만 Update
     public void updateTotalPrice(Integer totalPrice){
         this.totalPrice = totalPrice;
     }
 
     //주문 상태 변경.
-    public void statusUpdate(String status){
-        this.status = OrderStatus.valueOf(status);
+    public void statusUpdate(OrderStatus status){
+        this.status = status;
+    }
+
+    // 주문 요청 사항 변경
+    public void updateRequest(String request) {
+        this.request = request;
     }
 
 
-    //주문 요청 사항 변경
-    public void update(OrderRequestDto req, Store store, Address address) {
-        this.store = store;
-        this.address = address;
-        this.orderType = req.getOrderType();
-        this.request = req.getRequest();
-    }
+//    //주문 요청 사항 변경
+//    public void update(OrderRequestDto req, Store store, Address address,Integer totalPrice) {
+//        this.store = store;
+//        this.address = address;
+//        this.orderType = req.getOrderType();
+//        this.request = req.getRequest();
+//        this.orderType = req.getOrderType();
+//        this.totalPrice = totalPrice;
+//    }
 
     // 주문 생성.
     public static Order createOrder(User user, Store store,  Address address, OrderType orderType,Integer totalPrice, String request) {
