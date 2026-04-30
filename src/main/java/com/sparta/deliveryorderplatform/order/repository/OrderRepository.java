@@ -17,7 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     Page<Order> findAllByStore_IdAndStatus(UUID storeId, OrderStatus status, Pageable pageable);
 
-    Page<Order> findAllByStatusAndUser_username(String status, String username, Pageable pageable);
+//    Page<Order> findAllByStatusAndUser_username(String status, String username, Pageable pageable);
 
     Page<Order> findAllByUser_username(String username, Pageable pageable);
 
@@ -33,5 +33,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     Page<Order> findAllByStore_id(UUID storeId, Pageable page);
 
-    Page<Order> findAllByStatusAndStore_id(OrderStatus status, UUID storeId);
+    Page<Order> findAllByStatusAndStore_id(OrderStatus status, UUID storeId,Pageable page);
+
+    UUID store(Store store);
 }

@@ -6,6 +6,7 @@ import com.sparta.deliveryorderplatform.order.dto.OrdeStatusRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderSearch;
+import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
 import com.sparta.deliveryorderplatform.order.service.OrderService;
 import com.sparta.deliveryorderplatform.user.security.UserDetailsImpl;
 import jakarta.validation.Valid;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -54,16 +56,16 @@ public class OrderController {
     /**
      * 전체 목록 조회
      *
-     * @param search   검색 조건 - 주문 상태, 가게
      * @param pageable 페이징 조건
      * @param impl     인증 객체
      * @return
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<OrderResponseDto>>> getOrders(OrderSearch search,
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponseDto>>> getOrders(@RequestParam(required = false) UUID storeId,
+        @RequestParam(required = false) OrderStatus status,
         @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Direction.DESC) Pageable pageable,
         @AuthenticationPrincipal UserDetailsImpl impl) {
-        PageResponse response = orderService.getAllOrders(search, pageable, impl.getUsername(),
+        PageResponse response = orderService.getAllOrders(storeId, status, pageable, impl.getUsername(),
             impl.getUser().getRole());
         return ResponseEntity.ok(ApiResponse.success(response));
     }

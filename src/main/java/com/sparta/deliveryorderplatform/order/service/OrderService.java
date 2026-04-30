@@ -101,54 +101,58 @@ public class OrderService {
     /**
      * 전체 목록 조회
      *
-     * @param search   검색 조건 - 주문 상태, 가게
      * @param page     페이징 조건
      * @param username 사용자 식별자
      * @param role     사용자 권한
      * @return
      */
-    public PageResponse getAllOrders(OrderSearch search, Pageable page, String username,
+    public PageResponse getAllOrders(UUID storeId, OrderStatus status, Pageable page, String username,
         UserRole role) {
         Page<Order> orderPage;
 
         //먼저 사용자의 권한을 확인한다.
         if(role == UserRole.OWNER){
+            // 일단 가게 정보를 넣지 않았을 때의 null 처리를 한다.
+            if(storeId == null) {
+                throw new CustomException(ErrorCode.STORE_NOT_FOUND);
+            }
             //먼저 자기 가게인지 인증한다.
-            Store store = storeRepository.findById(search.getStoreId()).orElseThrow(()-> new CustomException(ErrorCode.STORE_NOT_FOUND));
+            Store store = storeRepository.findById(storeId).orElseThrow(()-> new CustomException(ErrorCode.STORE_NOT_FOUND));
             //본인 가게가 아니라면 접근 제한한다.
-            if(username.equals(store.getOwner().getUsername())){
+            if(!username.equals(store.getOwner().getUsername())){
                 throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
             }
 
+
             //검색 조건 중 주문 상태만 확인한다.
             //주문 상태가 없다면
-            if(search.getStatus() == null) {
+            if(status == null) {
                 //이 가게로의 모든 주문을 조회한다.
-                orderPage = orderRepository.findAllByStore_Id(search.getStoreId(),page);
+                orderPage = orderRepository.findAllByStore_Id(storeId,page);
             }else {
                 //주문 상태가 있다면, 주문 상태에 따른 이 가게로의 주문을 조회한다.
-                orderPage = orderRepository.findAllByStore_IdAndStatus(search.getStoreId(), search.getStatus(),page);
+                orderPage = orderRepository.findAllByStore_IdAndStatus(storeId, status,page);
             }
         }else if(role == UserRole.CUSTOMER){ //권한이 고객이라면
-            if(search.getStatus() != null && search.getStoreId() == null){ //검색 조건이 주문 상태만 있다면(가게 정보가 없는 경우)
-                orderPage = orderRepository.findAllByUser_usernameAndStatus(username, search.getStatus(),page);
-            }else if(search.getStatus() == null && search.getStoreId() != null){// 검색 조건이 가게 정보만 있다면(주문 상태가 없는 경우)
-                orderPage = orderRepository.findAllByUser_usernameAndStore_id(username, search.getStoreId(),page);
-            }else if(search.getStatus() == null && search.getStoreId() == null) { // 둘다 없는 거라면
+            if(status != null && storeId == null){ //검색 조건이 주문 상태만 있다면(가게 정보가 없는 경우)
+                orderPage = orderRepository.findAllByUser_usernameAndStatus(username, status,page);
+            }else if(status == null && storeId != null){// 검색 조건이 가게 정보만 있다면(주문 상태가 없는 경우)
+                orderPage = orderRepository.findAllByUser_usernameAndStore_id(username, storeId,page);
+            }else if(status == null && storeId == null) { // 둘다 없는 거라면
                 orderPage = orderRepository.findAllByUser_username(username, page);
             }else { // 둘다 있는 거라면
-                orderPage = orderRepository.findAllByUser_usernameAndStatusAndStore_id(username,search.getStatus(),search.getStoreId(),page);
+                orderPage = orderRepository.findAllByUser_usernameAndStatusAndStore_id(username,status,storeId,page);
             }
         }else if(role == UserRole.MASTER) { // 권한이 관리자라면,
             // 검색 조건을 먼저 확인한다.
-            if(search.getStatus() != null && search.getStoreId() == null) { //주문 상태만 있다면
-                orderPage = orderRepository.findAllByStatus(search.getStatus(),page);
-            }else if(search.getStatus() == null && search.getStoreId() != null) { // 특정 가게에 대한 조건이 있다면
-                orderPage = orderRepository.findAllByStore_id(search.getStoreId(),page);
-            }else if(search.getStatus() == null && search.getStoreId() == null) { // 딱히 검색 조건이 없다라면
+            if(status != null && storeId == null) { //주문 상태만 있다면
+                orderPage = orderRepository.findAllByStatus(status,page);
+            }else if(status == null && storeId != null) { // 특정 가게에 대한 조건이 있다면
+                orderPage = orderRepository.findAllByStore_id(storeId,page);
+            }else if(status == null && storeId == null) { // 딱히 검색 조건이 없다라면
                 orderPage = orderRepository.findAll(page);
             } else { // 검색 조건이 둘다 있다라면,
-                orderPage = orderRepository.findAllByStatusAndStore_id(search.getStatus(),search.getStoreId());
+                orderPage = orderRepository.findAllByStatusAndStore_id(status,storeId, page);
             }
         } else { // 추후에 추가될 권한의 경우, 접근 제한을 건다.
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
@@ -237,6 +241,7 @@ public class OrderService {
         // 다음 사용자 권한이 가게 주인일 때만, 순차적으로 주문 상태를 변경 시켜 status에 저장한다.
         if (role == UserRole.OWNER) {
             OrderStatus ownerStatus = updateOrder.getStatus().getNextStatus();
+            updateOrder.statusUpdate(ownerStatus);
         } else {
             // 다음 사용자 권한이 관리자인 경우에는 전달 받은 status로 변경한다.
             updateOrder.statusUpdate(status.getStatus());
