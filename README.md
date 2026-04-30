@@ -7,15 +7,16 @@
 
 ## 문서 구성
 
-| 문서 | 한 줄 요약 |
-|------|-----------|
-| [프로젝트 개요](./docs/project-overview.md) | 주제, 범위, 정책, 핵심 규약 한눈에 |
+| 문서                                            | 한 줄 요약 |
+|-----------------------------------------------|-----------|
+| [프로젝트 개요](./docs/project-overview.md)         | 주제, 범위, 정책, 핵심 규약 한눈에 |
 | [아키텍처 가이드](./docs/tech-stack-architecture.md) | 패키지 구조, 계층별 역할, 코드 배치 규칙 |
-| [공통 컴포넌트](./docs/common-components.md) | 공통 응답 형식, 예외 처리, Base Entity |
-| [API 설계 가이드](./docs/api-design-guide.md) | RESTful 설계 원칙, 도메인별 API 목록 |
-| [보안 설계](./docs/security-design.md) | JWT 인증, 권한 재검증, 민감 정보 관리 |
-| [DB 설계](./docs/database-design.md) | ERD, 테이블 정의, 관계 및 설계 결정 사항 |
-| [작업 현황 & TODO](./docs/work-status-todo.md) | 미완성 문서 목록, 결정 대기 항목 정리 |
+| [공통 컴포넌트](./docs/common-components.md)        | 공통 응답 형식, 예외 처리, Base Entity |
+| [API 설계 가이드](./docs/api-design-guide.md)      | RESTful 설계 원칙, 도메인별 API 목록 |
+| [보안 설계](./docs/security-design.md)            | JWT 인증, 권한 재검증, 민감 정보 관리 |
+| [DB 설계](./docs/database-design.md)            | ERD, 테이블 정의, 관계 및 설계 결정 사항 |
+| [아키텍처](./docs/architecture.md)                 | 인프라 구성, 배포 파이프라인 |
+| [시퀀스 다이어그램](./docs/sequence-diagrams.md)    | 도메인별 주요 기능 처리 흐름 |
 
 ---
 
@@ -52,17 +53,19 @@ CREATE DATABASE deliver;
 ## 환경 변수 항목 설명
 > ⚠️ 실제 값이 들어간 파일은 절대 Git에 커밋하지 마세요!
 
-| 변수명 | 설명 |
-|--------|------|
-| `db.url` | PostgreSQL 접속 URL |
-| `db.user` | DB 사용자명 |
-| `db.password` | DB 비밀번호 |
-| `JWT_SECRET` | JWT 서명에 사용하는 비밀 키 (임의의 긴 문자열) |
-| `JWT_ACCESS_TOKEN_EXP_MIN` | 액세스 토큰 유효 시간 (단위: 분) |
-| `JWT_REFRESH_TOKEN_EXP_DAYS` | 리프레시 토큰 유효 시간 (단위: 일) |
-| `gemini.api.url` | Google Gemini API 엔드포인트 |
-| `gemini.api.key` | Gemini API 키 ([Google AI Studio](https://aistudio.google.com/)에서 발급) |
-| `ai.service.url` | 내부 AI 서비스 주소 |
+| 변수명                          | 설명                                                                   |
+|------------------------------|----------------------------------------------------------------------|
+| `DB_URL`                     | PostgreSQL 접속 URL                                                    |
+| `DB_USER`                    | DB 사용자명                                                              |
+| `DB_PASSWORD`                | DB 비밀번호                                                              |
+| `JWT_SECRET`                 | JWT 서명에 사용하는 비밀 키 (임의의 긴 문자열)                                        |
+| `JWT_ACCESS_TOKEN_EXP_MIN`   | 액세스 토큰 유효 시간 (단위: 분)                                                 |
+| `JWT_REFRESH_TOKEN_EXP_DAYS` | 리프레시 토큰 유효 시간 (단위: 일)                                                |
+| `GEMINI_API_URL`             | Google Gemini API 엔드포인트                                              |
+| `GEMINI_API_KEY`             | Gemini API 키 ([Google AI Studio](https://aistudio.google.com/)에서 발급) |
+| `AI_SERVICE_URL`             | 내부 AI 서비스 주소                                                         |
+| `REDIS_HOST`                 | Redis host 이름                                                        |
+| `REDIS_PORT`                 | Redis 포트                                                             |
 
 ---
 ## 실행방법
