@@ -33,6 +33,13 @@ sequenceDiagram
         Service-->>Client: 400 INVALID_RATING
     end
 
+    Service->>ReviewRepo: flush()
+
+    Service->>ReviewRepo: findAverageRatingByStoreId(storeId)
+    ReviewRepo-->>Service: Double
+
+    Note over Service: store.updateAverageRating(newAverageRating)
+
     Service-->>Controller: ReviewResponse
     Controller-->>Client: 200 OK (ApiResponse)
 ```

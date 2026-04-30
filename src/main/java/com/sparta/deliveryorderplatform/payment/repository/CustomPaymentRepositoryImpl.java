@@ -8,6 +8,7 @@ import com.sparta.deliveryorderplatform.order.entity.QOrder;
 import com.sparta.deliveryorderplatform.payment.entity.Payment;
 import com.sparta.deliveryorderplatform.payment.entity.QPayment;
 import com.sparta.deliveryorderplatform.store.entity.QStore;
+import com.sparta.deliveryorderplatform.user.entity.QUser;
 import com.sparta.deliveryorderplatform.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @RequiredArgsConstructor
@@ -66,6 +68,26 @@ public class CustomPaymentRepositoryImpl implements CustomPaymentRepository{
         ).orElse(0L);
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public String findOwnerUsernameByPaymentId(UUID paymentId) {
+
+        QPayment payment = QPayment.payment;
+        QOrder order = QOrder.order;
+        QStore store = QStore.store;
+        QUser user = QUser.user;
+
+        String ownerUsername = jpaQueryFactory
+                .select(user.username)
+                .from(payment)
+                .join(payment.order, order)
+                .join(order.store, store)
+                .join(store.owner, user)
+                .where(payment.id.eq(paymentId))
+                .fetchOne();
+
+        return ownerUsername;
     }
 
     private OrderSpecifier[] getSortCondition(final Sort sort) {

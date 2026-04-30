@@ -32,11 +32,11 @@ public class ReviewController {
      * @param orderId
      * @param request
      * @param userDetails
-     * @return
+     * @return ReviewResponse
      */
     @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping("/orders/{orderId}/reviews")
-    public ResponseEntity<?> createReview(@PathVariable UUID orderId,
+    public ResponseEntity<ApiResponse<ReviewResponse>> createReview(@PathVariable UUID orderId,
                                           @Valid @RequestBody CreateReviewRequest request,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
@@ -49,10 +49,10 @@ public class ReviewController {
      * 리뷰 목록 조회 api
      * @param request
      * @param pageable
-     * @return
+     * @return Page<ReviewResponse>
      */
     @GetMapping("/reviews")
-    public ResponseEntity<?> getReviewList(@ModelAttribute SearchReviewCondition request,
+    public ResponseEntity<ApiResponse<PageResponse<ReviewResponse>>> getReviewList(@ModelAttribute SearchReviewCondition request,
                                            @PageableDefault(size = 10, page = 0) Pageable pageable) {
 
         Page<ReviewResponse> response = reviewService.getReviewList(request, pageable);
@@ -63,10 +63,10 @@ public class ReviewController {
     /**
      * 리뷰 상세 조회 api
      * @param reviewId
-     * @return
+     * @return ReviewResponse
      */
     @GetMapping("/reviews/{reviewId}")
-    public ResponseEntity<?> getReviewById(@PathVariable UUID reviewId) {
+    public ResponseEntity<ApiResponse<ReviewResponse>> getReviewById(@PathVariable UUID reviewId) {
 
         ReviewResponse response = reviewService.getReviewById(reviewId);
 
@@ -78,11 +78,11 @@ public class ReviewController {
      * @param reviewId
      * @param request
      * @param userDetails
-     * @return
+     * @return ReviewResponse
      */
     @PreAuthorize("hasRole('CUSTOMER')")
     @PatchMapping("/reviews/{reviewId}")
-    public ResponseEntity<?> updateReview(@PathVariable UUID reviewId,
+    public ResponseEntity<ApiResponse<ReviewResponse>> updateReview(@PathVariable UUID reviewId,
                                           @Valid @RequestBody UpdateReviewRequest request,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
@@ -99,7 +99,7 @@ public class ReviewController {
      */
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('MASTER')")
     @DeleteMapping("/reviews/{reviewId}")
-    public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId,
+    public ResponseEntity<ApiResponse<Void>> deleteReview(@PathVariable UUID reviewId,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         reviewService.deleteReview(

@@ -47,7 +47,7 @@ public class MenuService {
         Menu menu = new Menu(menuRequestDto, store);
 
         //ai 사용시 내부 client를 통해 HTTP 호출
-        if (menuRequestDto.getAiDescription() != null) {
+        if (menuRequestDto.getAiDescription()) {
             description = aiClient.generateDescription(menuRequestDto.getAiPrompt(), token);
             menu.setDescription(description);
         }
