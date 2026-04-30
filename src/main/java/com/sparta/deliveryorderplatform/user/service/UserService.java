@@ -49,6 +49,7 @@ public class UserService {
 		return UserResponseDto.from(user);
 	}
 
+	@Transactional
 	public void updatePassword(String username, PasswordChangeRequestDto requestDto, User loginUser) {
 		// 1. 본인 확인 (비밀번호 변경은 관리자도 불가능)
 		if (!loginUser.getUsername().equals(username)) {
@@ -66,6 +67,7 @@ public class UserService {
 		userCacheService.evict(username);
 	}
 
+	@Transactional
 	public void updateUserRole (String username, UserRoleUpdateRequestDto requestDto, User loginUser) {
 		if (loginUser.getRole() != UserRole.MASTER) {
 			throw new CustomException(ErrorCode.ACCESS_DENIED);
