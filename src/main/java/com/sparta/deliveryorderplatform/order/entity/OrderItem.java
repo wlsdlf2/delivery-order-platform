@@ -68,7 +68,7 @@ public class OrderItem  {
             .build();
     }
     public void update(OrderItem item){
-        OrderItem.builder()
+        this.builder()
             .menu(item.getMenu())
             .quantity(item.getQuantity())
             .unitPrice(item.getUnitPrice())
