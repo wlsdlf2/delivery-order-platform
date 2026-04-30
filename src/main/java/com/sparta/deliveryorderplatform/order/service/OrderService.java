@@ -11,7 +11,6 @@ import com.sparta.deliveryorderplatform.order.dto.OrdeStatusRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderItemRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderRequestDto;
 import com.sparta.deliveryorderplatform.order.dto.OrderResponseDto;
-import com.sparta.deliveryorderplatform.order.dto.OrderSearch;
 import com.sparta.deliveryorderplatform.order.entity.Order;
 import com.sparta.deliveryorderplatform.order.entity.OrderItem;
 import com.sparta.deliveryorderplatform.order.entity.OrderStatus;
